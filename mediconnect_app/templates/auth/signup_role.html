@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block title %}Sign Up - MediConnect{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-form">
+        <h1>Choose Your Role</h1>
+        <p style="text-align: center; color: #999; margin-bottom: 30px;">Select whether you're a healthcare provider or patient</p>
+
+        <div class="role-selection">
+            <a href="{% url 'doctor_signup' %}" class="role-card">
+                <div style="font-size: 48px; margin-bottom: 15px;">👨‍⚕️</div>
+                <h3>Doctor</h3>
+                <p>Register as a healthcare professional to manage patient appointments and records</p>
+            </a>
+
+            <a href="{% url 'patient_signup' %}" class="role-card">
+                <div style="font-size: 48px; margin-bottom: 15px;">🙋‍♂️</div>
+                <h3>Patient</h3>
+                <p>Register as a patient to book appointments and track your health</p>
+            </a>
+        </div>
+
+        <div class="auth-link">
+            Already have an account? <a href="{% url 'login' %}">Sign in here</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

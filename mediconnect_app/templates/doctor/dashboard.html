@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+
+{% block title %}Doctor Dashboard - MediConnect{% endblock %}
+
+{% block content %}
+<h1>Welcome, Dr. {{ user.last_name }}! 👋</h1>
+<p style="color: #999; margin-bottom: 30px;">Manage patients and appointments</p>
+
+<!-- Stats -->
+<div class="stats-grid">
+    <div class="stat-card stat-primary">
+        <div class="stat-label">Total Unique Patients</div>
+        <div class="stat-value">{{ total_patients }}</div>
+    </div>
+    <div class="stat-card stat-success">
+        <div class="stat-label">Today's Appointments</div>
+        <div class="stat-value">{{ today_appointments_count }}</div>
+    </div>
+    <div class="stat-card stat-info">
+        <div class="stat-label">Completed Today</div>
+        <div class="stat-value">{{ completed_today }}</div>
+    </div>
+    <div class="stat-card stat-warning">
+        <div class="stat-label">Remaining Today</div>
+        <div class="stat-value">{{ remaining_today }}</div>
+    </div>
+</div>
+
+<!-- Today's Schedule -->
+<div class="card">
+    <div class="card-header">
+        <h2>📅 Today's Schedule</h2>
+        <a href="{% url 'doctor_appointments_list' %}" class="btn btn-outline btn-sm">View All</a>
+    </div>
+    <div class="card-body">
+        {% if next_4_appointments %}
+            {% for appointment in next_4_appointments %}
+                <div class="appointment-item">
+                    <div class="appointment-date">
+                        🕐 {{ appointment.time|time:"H:i" }}
+                    </div>
+                    <div class="appointment-doctor">
+                        👤 {{ appointment.patient.user.first_name }} {{ appointment.patient.user.last_name }}
+                    </div>
+                    <div style="font-size: 13px; color: #999; margin-bottom: 10px;">
+                        📞 {{ appointment.patient.phone }}
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <strong>Reason:</strong> {{ appointment.reason|truncatewords:10 }}
+                    </div>
+                    <div class="appointment-status">
+                        <span class="badge status-{{ appointment.status }}">{{ appointment.get_status_display }}</span>
+                        <a href="{% url 'appointment_detail' appointment.id %}" class="btn btn-sm btn-primary" style="margin-left: 10px;">Details</a>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p style="color: #999;">No appointments scheduled for today.</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Pending Prescriptions & Recent Patients -->
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 30px;">
+    <div class="card">
+        <div class="card-header">
+            <h3 style="margin: 0;">💊 Prescriptions (Today)</h3>
+        </div>
+        <div class="card-body">
+            <div class="stat-card stat-info" style="border-left-color: #0099ff;">
+                <div class="stat-label">Prescriptions Created</div>
+                <div class="stat-value">{{ pending_prescriptions }}</div>
+            </div>
+            <p style="color: #999; margin-top: 15px; font-size: 13px;">Total prescriptions created today</p>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h3 style="margin: 0;">👥 Recent Patients</h3>
+        </div>
+        <div class="card-body">
+            {% if recent_patients %}
+                <div class="list-group" style="box-shadow: none; border-radius: 0;">
+                    {% for patient in recent_patients %}
+                        <a href="{% url 'doctor_patients_list' %}" class="list-group-item">
+                            <div>{{ patient.user.first_name }} {{ patient.user.last_name }}</div>
+                            <small style="color: #999;">{{ patient.city }}, {{ patient.country }}</small>
+                        </a>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p style="color: #999;">No recent patients.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-top: 30px;">
+    <a href="{% url 'doctor_patients_list' %}" class="card" style="padding: 20px; text-align: center; text-decoration: none; color: inherit;">
+        <div style="font-size: 32px; margin-bottom: 10px;">👥</div>
+        <h4 style="margin-bottom: 5px;">My Patients</h4>
+        <p style="color: #999; margin: 0;">View all</p>
+    </a>
+    <a href="{% url 'doctor_appointments_list' %}" class="card" style="padding: 20px; text-align: center; text-decoration: none; color: inherit;">
+        <div style="font-size: 32px; margin-bottom: 10px;">📋</div>
+        <h4 style="margin-bottom: 5px;">Appointments</h4>
+        <p style="color: #999; margin: 0;">Manage all</p>
+    </a>
+    <a href="{% url 'doctor_profile' %}" class="card" style="padding: 20px; text-align: center; text-decoration: none; color: inherit;">
+        <div style="font-size: 32px; margin-bottom: 10px;">👤</div>
+        <h4 style="margin-bottom: 5px;">My Profile</h4>
+        <p style="color: #999; margin: 0;">View details</p>
+    </a>
+</div>
+{% endblock %}

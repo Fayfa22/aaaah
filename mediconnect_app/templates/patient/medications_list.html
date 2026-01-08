@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% block title %}Medications - MediConnect{% endblock %}
+
+{% block content %}
+<h1>💊 Medications</h1>
+<p style="color: #999; margin-bottom: 30px;">Track your current and past medications</p>
+
+<!-- Filter Tabs -->
+<div style="display: flex; gap: 10px; margin-bottom: 25px; border-bottom: 2px solid #eee;">
+    <a href="?status=" class="btn btn-outline btn-sm" style="border: none; border-bottom: 3px solid {% if not selected_status %}#0066cc{% else %}transparent{% endif %}; padding-bottom: 10px; border-radius: 0; background: none; color: inherit;">
+        All ({{ medications.count }})
+    </a>
+    <a href="?status=active" class="btn btn-outline btn-sm" style="border: none; border-bottom: 3px solid {% if selected_status == 'active' %}#00b366{% else %}transparent{% endif %}; padding-bottom: 10px; border-radius: 0; background: none; color: inherit;">
+        Active ({{ active_medications.count }})
+    </a>
+    <a href="?status=completed" class="btn btn-outline btn-sm" style="border: none; border-bottom: 3px solid {% if selected_status == 'completed' %}#0066cc{% else %}transparent{% endif %}; padding-bottom: 10px; border-radius: 0; background: none; color: inherit;">
+        Completed ({{ completed_medications.count }})
+    </a>
+    <a href="?status=discontinued" class="btn btn-outline btn-sm" style="border: none; border-bottom: 3px solid {% if selected_status == 'discontinued' %}#ff4444{% else %}transparent{% endif %}; padding-bottom: 10px; border-radius: 0; background: none; color: inherit;">
+        Discontinued ({{ discontinued_medications.count }})
+    </a>
+</div>
+
+<!-- Medications Table -->
+<div class="card">
+    {% if medications %}
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Medication</th>
+                        <th>Dosage</th>
+                        <th>Frequency</th>
+                        <th>Period</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for medication in medications %}
+                        <tr>
+                            <td><strong>{{ medication.medication_name }}</strong></td>
+                            <td>{{ medication.dosage }}</td>
+                            <td>{{ medication.frequency }}</td>
+                            <td>
+                                {{ medication.start_date|date:"M d" }}
+                                {% if medication.end_date %}
+                                    - {{ medication.end_date|date:"M d, Y" }}
+                                {% else %}
+                                    - Ongoing
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="badge status-{{ medication.status }}">{{ medication.get_status_display }}</span>
+                            </td>
+                            <td>
+                                <a href="{% url 'edit_medication' medication.id %}" class="btn btn-sm btn-primary">Edit</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div style="padding: 40px; text-align: center;">
+            <p style="color: #999;">No medications found in this category.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

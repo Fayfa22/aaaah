@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block title %}Record Checkup - MediConnect{% endblock %}
+
+{% block content %}
+<div style="max-width: 900px; margin: 0 auto;">
+    <h1>💓 Record Checkup</h1>
+    <p style="color: #999; margin-bottom: 30px;">Patient: <strong>{{ patient.user.first_name }} {{ patient.user.last_name }}</strong></p>
+
+    <div class="card">
+        <form method="POST">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger">
+                    {% for error in form.non_field_errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <!-- Vital Signs Section -->
+            <h3 style="color: #0066cc; margin-bottom: 20px;">📊 Vital Signs</h3>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Heart Rate (bpm)</label>
+                    {{ form.heart_rate }}
+                </div>
+                <div class="form-group">
+                    <label>Temperature (°F)</label>
+                    {{ form.temperature }}
+                </div>
+                <div class="form-group">
+                    <label>Oxygen Saturation (%)</label>
+                    {{ form.oxygen_saturation }}
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Blood Pressure Systolic (mmHg)</label>
+                    {{ form.blood_pressure_systolic }}
+                </div>
+                <div class="form-group">
+                    <label>Blood Pressure Diastolic (mmHg)</label>
+                    {{ form.blood_pressure_diastolic }}
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Weight (kg)</label>
+                    {{ form.weight }}
+                </div>
+                <div class="form-group">
+                    <label>Height (cm)</label>
+                    {{ form.height }}
+                </div>
+            </div>
+
+            <!-- Clinical Section -->
+            <h3 style="color: #0066cc; margin-bottom: 20px; margin-top: 30px;">🏥 Clinical Information</h3>
+
+            <div class="form-group">
+                <label>Symptoms</label>
+                {{ form.symptoms }}
+            </div>
+
+            <div class="form-group">
+                <label>Diagnosis</label>
+                {{ form.diagnosis }}
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Predicted Disease (if any)</label>
+                    {{ form.predicted_disease }}
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Notes (optional)</label>
+                {{ form.notes }}
+            </div>
+
+            <!-- Submit -->
+            <div style="margin-top: 30px; display: flex; gap: 10px;">
+                <button type="submit" class="btn btn-primary btn-lg">Save Checkup</button>
+                <a href="{% url 'doctor_patients_list' %}" class="btn btn-outline btn-lg">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Medication - MediConnect{% endblock %}
+
+{% block content %}
+<h1>Edit Medication</h1>
+
+<div style="max-width: 600px;">
+    <div class="card">
+        <form method="POST">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label>Medication Name</label>
+                {{ form.medication_name }}
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Dosage</label>
+                    {{ form.dosage }}
+                </div>
+
+                <div class="form-group">
+                    <label>Frequency</label>
+                    {{ form.frequency }}
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Status</label>
+                    {{ form.status }}
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Start Date</label>
+                    {{ form.start_date }}
+                </div>
+
+                <div class="form-group">
+                    <label>End Date (optional)</label>
+                    {{ form.end_date }}
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Notes</label>
+                {{ form.notes }}
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+                <a href="{% url 'medications_list' %}" class="btn btn-outline">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

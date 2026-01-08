@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+
+{% block title %}Doctor Profile - MediConnect{% endblock %}
+
+{% block content %}
+<h1>👨‍⚕️ Doctor Profile</h1>
+
+<div style="display: grid; grid-template-columns: 1fr 2fr; gap: 30px; margin-top: 30px;">
+    <!-- Professional Card -->
+    <div class="card">
+        <div class="card-header">
+            <h3 style="margin: 0;">Credentials</h3>
+        </div>
+        <div class="card-body">
+            <div style="margin-bottom: 20px;">
+                <label style="color: #999; font-size: 12px; text-transform: uppercase;">Full Name</label>
+                <div style="font-size: 18px; font-weight: 600;">Dr. {{ doctor.user.first_name }} {{ doctor.user.last_name }}</div>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label style="color: #999; font-size: 12px; text-transform: uppercase;">Email</label>
+                <div>{{ doctor.user.email }}</div>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label style="color: #999; font-size: 12px; text-transform: uppercase;">Phone</label>
+                <div>{{ doctor.phone }}</div>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label style="color: #999; font-size: 12px; text-transform: uppercase;">Specialization</label>
+                <div style="font-size: 16px; font-weight: 600; color: #0066cc;">{{ doctor.specialization }}</div>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label style="color: #999; font-size: 12px; text-transform: uppercase;">Years of Experience</label>
+                <div>{{ doctor.years_of_experience }} years</div>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label style="color: #999; font-size: 12px; text-transform: uppercase;">License Number</label>
+                <div><strong>{{ doctor.license_number }}</strong></div>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label style="color: #999; font-size: 12px; text-transform: uppercase;">Working Hours</label>
+                <div>{{ doctor.working_hours }}</div>
+            </div>
+
+            <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee;">
+                <small style="color: #999;">Member since {{ doctor.user.date_joined|date:"M Y" }}</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Clinic Information -->
+    <div>
+        <div class="card">
+            <div class="card-header">
+                <h3 style="margin: 0;">Clinic Information</h3>
+            </div>
+            <div class="card-body">
+                <div style="margin-bottom: 25px;">
+                    <h4 style="color: #0066cc;">{{ doctor.clinic_name }}</h4>
+                    <p style="margin: 10px 0 0 0; color: #666;">{{ doctor.clinic_address }}</p>
+                </div>
+
+                <div style="background: #f9f9f9; padding: 15px; border-radius: 6px; margin-bottom: 25px;">
+                    <label style="color: #999; font-size: 12px; text-transform: uppercase; margin-bottom: 8px; display: block;">Working Hours</label>
+                    <div style="font-weight: 600;">{{ doctor.working_hours }}</div>
+                </div>
+
+                <!-- Statistics -->
+                <div style="display: grid; gap: 15px;">
+                    <div style="padding: 15px; background: #e6f0ff; border-radius: 6px;">
+                        <div style="font-size: 12px; color: #0066cc; text-transform: uppercase; margin-bottom: 5px;">Specialization</div>
+                        <div style="font-weight: 600;">{{ doctor.specialization }}</div>
+                    </div>
+                    <div style="padding: 15px; background: #e6f9f0; border-radius: 6px;">
+                        <div style="font-size: 12px; color: #008c47; text-transform: uppercase; margin-bottom: 5px;">Experience</div>
+                        <div style="font-weight: 600;">{{ doctor.years_of_experience }} years</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="stats-grid" style="margin-top: 30px;">
+            <div class="stat-card stat-primary">
+                <div class="stat-label">Total Appointments</div>
+                <div class="stat-value">{{ doctor.appointments.count }}</div>
+            </div>
+            <div class="stat-card stat-success">
+                <div class="stat-label">Completed Checkups</div>
+                <div class="stat-value">{{ doctor.checkups.count }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

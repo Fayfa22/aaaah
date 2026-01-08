@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block title %}Prescriptions - MediConnect{% endblock %}
+
+{% block content %}
+<h1>💊 Your Prescriptions</h1>
+<p style="color: #999; margin-bottom: 30px;">All medications prescribed by doctors</p>
+
+<div class="card">
+    {% if prescriptions %}
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Medication</th>
+                        <th>Doctor</th>
+                        <th>Dosage</th>
+                        <th>Frequency</th>
+                        <th>Duration</th>
+                        <th>Date Prescribed</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for prescription in prescriptions %}
+                        <tr>
+                            <td><strong>{{ prescription.medication_name }}</strong></td>
+                            <td>Dr. {{ prescription.doctor.user.first_name }} {{ prescription.doctor.user.last_name }}</td>
+                            <td>{{ prescription.dosage }}</td>
+                            <td>{{ prescription.frequency }}</td>
+                            <td>{{ prescription.duration }}</td>
+                            <td>{{ prescription.created_at|date:"M d, Y" }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div style="padding: 40px; text-align: center;">
+            <p style="color: #999;">No prescriptions yet.</p>
+        </div>
+    {% endif %}
+</div>
+
+<div style="margin-top: 30px;">
+    <a href="{% url 'patient_dashboard' %}" class="btn btn-outline">← Back to Dashboard</a>
+</div>
+{% endblock %}

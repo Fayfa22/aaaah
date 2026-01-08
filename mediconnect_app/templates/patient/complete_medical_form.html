@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block title %}Complete Medical Form - MediConnect{% endblock %}
+
+{% block content %}
+<div style="max-width: 800px; margin: 0 auto;">
+    <h1>📋 Complete Your Medical History</h1>
+    <p style="color: #999; margin-bottom: 30px;">This information helps us provide better care tailored to your needs</p>
+
+    <div class="card">
+        <form method="POST">
+            {% csrf_token %}
+
+            <!-- Chronic Diseases -->
+            <div class="form-group">
+                <h3 style="color: #0066cc; margin-bottom: 15px;">Chronic Diseases</h3>
+                <label class="form-check">
+                    <input type="checkbox" name="has_chronic_diseases" value="on" class="form-check-input" onchange="toggleSection(this, 'chronic-diseases-section')">
+                    <span class="form-check-label">I have been diagnosed with chronic disease(s)</span>
+                </label>
+                <div id="chronic-diseases-section" style="display: none; margin-top: 15px; padding: 15px; background: #f9f9f9; border-radius: 6px;">
+                    {% for choice, label in form.chronic_disease_choices.field.choices %}
+                        <label class="form-check">
+                            <input type="checkbox" name="chronic_disease_choices" value="{{ choice }}" class="form-check-input">
+                            <span class="form-check-label">{{ label }}</span>
+                        </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Allergies -->
+            <div class="form-group" style="margin-top: 30px;">
+                <h3 style="color: #0066cc; margin-bottom: 15px;">Allergies</h3>
+                <label class="form-check">
+                    <input type="checkbox" name="has_allergies" value="on" class="form-check-input" onchange="toggleSection(this, 'allergies-section')">
+                    <span class="form-check-label">I have allergies</span>
+                </label>
+                <div id="allergies-section" style="display: none; margin-top: 15px;">
+                    <label>Please describe your allergies:</label>
+                    <textarea name="allergies" class="form-control" placeholder="e.g., Penicillin, Peanuts..."></textarea>
+                </div>
+            </div>
+
+            <!-- Vaccines -->
+            <div class="form-group" style="margin-top: 30px;">
+                <h3 style="color: #0066cc; margin-bottom: 15px;">Vaccines Received</h3>
+                <p style="color: #999; font-size: 13px;">Select vaccines you have received:</p>
+                <div style="margin-top: 15px; padding: 15px; background: #f9f9f9; border-radius: 6px;">
+                    {% for choice, label in form.vaccine_choices.field.choices %}
+                        <label class="form-check">
+                            <input type="checkbox" name="vaccine_choices" value="{{ choice }}" class="form-check-input">
+                            <span class="form-check-label">{{ label }}</span>
+                        </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Family History -->
+            <div class="form-group" style="margin-top: 30px;">
+                <h3 style="color: #0066cc; margin-bottom: 15px;">Family History</h3>
+                <label class="form-check">
+                    <input type="checkbox" name="has_family_history" value="on" class="form-check-input" onchange="toggleSection(this, 'family-history-section')">
+                    <span class="form-check-label">There is significant family history of disease</span>
+                </label>
+                <div id="family-history-section" style="display: none; margin-top: 15px; padding: 15px; background: #f9f9f9; border-radius: 6px;">
+                    {% for choice, label in form.family_history_choices.field.choices %}
+                        <label class="form-check">
+                            <input type="checkbox" name="family_history_choices" value="{{ choice }}" class="form-check-input">
+                            <span class="form-check-label">{{ label }}</span>
+                        </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Submit -->
+            <div style="margin-top: 40px; display: flex; gap: 10px;">
+                <button type="submit" class="btn btn-primary btn-lg">Complete Medical Form</button>
+                <a href="{% url 'patient_dashboard' %}" class="btn btn-outline btn-lg">Skip for Now</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function toggleSection(checkbox, sectionId) {
+    const section = document.getElementById(sectionId);
+    if (checkbox.checked) {
+        section.style.display = 'block';
+    } else {
+        section.style.display = 'none';
+    }
+}
+</script>
+{% endblock %}

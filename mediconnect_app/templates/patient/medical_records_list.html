@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block title %}Medical Records - MediConnect{% endblock %}
+
+{% block content %}
+<h1>📄 Medical Records</h1>
+<p style="color: #999; margin-bottom: 30px;">Upload and manage your medical documents</p>
+
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 30px;">
+    <!-- Upload Form -->
+    <div class="card">
+        <div class="card-header">
+            <h3 style="margin: 0;">Upload Document</h3>
+        </div>
+        <div class="card-body">
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label>Select File (PDF, DOC, JPG, PNG)</label>
+                    {{ form.file }}
+                </div>
+                <div class="form-group">
+                    <label>Description (optional)</label>
+                    {{ form.description }}
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Upload</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Your Records -->
+    <div class="card">
+        <div class="card-header">
+            <h3 style="margin: 0;">📊 Statistics</h3>
+        </div>
+        <div class="card-body">
+            <div class="stat-card stat-primary" style="border-left-color: #0066cc;">
+                <div class="stat-label">Total Files</div>
+                <div class="stat-value">{{ medical_records.count }}</div>
+            </div>
+            <p style="color: #999; margin-top: 15px; font-size: 13px;">Keep important medical documents organized in one place.</p>
+        </div>
+    </div>
+</div>
+
+<!-- Records List -->
+<div class="card" style="margin-top: 30px;">
+    <div class="card-header">
+        <h3 style="margin: 0;">Your Documents</h3>
+    </div>
+    <div class="card-body">
+        {% if medical_records %}
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Description</th>
+                            <th>Uploaded</th>
+                            <th>File Size</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for record in medical_records %}
+                            <tr>
+                                <td>
+                                    <strong>{{ record.description|default:"Medical Document" }}</strong>
+                                    <div style="font-size: 12px; color: #999;">{{ record.file.name|cut:"/"|slice:"-1:" }}</div>
+                                </td>
+                                <td>{{ record.uploaded_at|date:"M d, Y" }}</td>
+                                <td>
+                                    {% if record.file.size %}
+                                        {{ record.file.size|filesizeformat }}
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{{ record.file.url }}" class="btn btn-sm btn-primary" download>Download</a>
+                                    <a href="{% url 'delete_medical_record' record.id %}" class="btn btn-sm btn-danger">Delete</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p style="color: #999; text-align: center; padding: 40px 0;">
+                No documents uploaded yet. Start by uploading your medical records above.
+            </p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+
+{% block title %}Checkup Details - MediConnect{% endblock %}
+
+{% block content %}
+<h1>💓 Checkup Report</h1>
+<p style="color: #999; margin-bottom: 30px;">Date: <strong>{{ checkup.created_at|date:"F d, Y H:i" }}</strong></p>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+    <!-- Patient & Doctor -->
+    <div class="card">
+        <div class="card-header">
+            <h3 style="margin: 0;">Patient</h3>
+        </div>
+        <div class="card-body">
+            <div style="margin-bottom: 20px;">
+                <label style="color: #999; font-size: 12px; text-transform: uppercase;">Name</label>
+                <div style="font-size: 16px; font-weight: 600;">{{ checkup.patient.user.first_name }} {{ checkup.patient.user.last_name }}</div>
+            </div>
+            <div>
+                <label style="color: #999; font-size: 12px; text-transform: uppercase;">Phone</label>
+                <div>{{ checkup.patient.phone }}</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h3 style="margin: 0;">Doctor</h3>
+        </div>
+        <div class="card-body">
+            <div style="margin-bottom: 20px;">
+                <label style="color: #999; font-size: 12px; text-transform: uppercase;">Name</label>
+                <div style="font-size: 16px; font-weight: 600;">Dr. {{ checkup.doctor.user.first_name }} {{ checkup.doctor.user.last_name }}</div>
+            </div>
+            <div>
+                <label style="color: #999; font-size: 12px; text-transform: uppercase;">Specialization</label>
+                <div>{{ checkup.doctor.specialization }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Vital Signs -->
+<div class="card" style="margin-top: 30px;">
+    <div class="card-header">
+        <h3 style="margin: 0;">📊 Vital Signs</h3>
+    </div>
+    <div class="card-body">
+        <div class="vital-signs-grid">
+            <div class="vital-item">
+                <div class="vital-label">Heart Rate</div>
+                <div class="vital-value">{{ checkup.heart_rate }}<span class="vital-unit">bpm</span></div>
+            </div>
+            <div class="vital-item">
+                <div class="vital-label">Blood Pressure</div>
+                <div class="vital-value">{{ checkup.blood_pressure_systolic }}/{{ checkup.blood_pressure_diastolic }}<span class="vital-unit">mmHg</span></div>
+            </div>
+            <div class="vital-item">
+                <div class="vital-label">Temperature</div>
+                <div class="vital-value">{{ checkup.temperature }}<span class="vital-unit">°F</span></div>
+            </div>
+            <div class="vital-item">
+                <div class="vital-label">Oxygen Saturation</div>
+                <div class="vital-value">{{ checkup.oxygen_saturation }}<span class="vital-unit">%</span></div>
+            </div>
+            <div class="vital-item">
+                <div class="vital-label">Weight</div>
+                <div class="vital-value">{{ checkup.weight }}<span class="vital-unit">kg</span></div>
+            </div>
+            <div class="vital-item">
+                <div class="vital-label">Height</div>
+                <div class="vital-value">{{ checkup.height }}<span class="vital-unit">cm</span></div>
+            </div>
+        </div>
+
+        <!-- BMI -->
+        <div style="margin-top: 25px; padding: 20px; background: #e6f0ff; border-radius: 8px; border-left: 4px solid #0066cc;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr;">
+                <div>
+                    <label style="color: #0066cc; font-size: 12px; text-transform: uppercase; font-weight: 600;">BMI</label>
+                    <div style="font-size: 24px; font-weight: 700; color: #0066cc;">{{ bmi }}</div>
+                </div>
+                <div>
+                    <label style="color: #0066cc; font-size: 12px; text-transform: uppercase; font-weight: 600;">Category</label>
+                    <div style="font-size: 16px; font-weight: 600; color: #0066cc;">{{ bmi_category }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Clinical Information -->
+<div class="card" style="margin-top: 30px;">
+    <div class="card-header">
+        <h3 style="margin: 0;">🏥 Clinical Information</h3>
+    </div>
+    <div class="card-body">
+        <div style="margin-bottom: 25px;">
+            <h4 style="color: #0066cc;">Symptoms</h4>
+            <p>{{ checkup.symptoms }}</p>
+        </div>
+
+        <div style="margin-bottom: 25px; padding-bottom: 25px; border-bottom: 1px solid #eee;">
+            <h4 style="color: #0066cc;">Diagnosis</h4>
+            <p>{{ checkup.diagnosis }}</p>
+        </div>
+
+        {% if checkup.predicted_disease %}
+            <div style="margin-bottom: 25px;">
+                <h4 style="color: #0066cc;">Predicted Disease</h4>
+                <span class="badge badge-warning">{{ checkup.predicted_disease }}</span>
+            </div>
+        {% endif %}
+
+        {% if checkup.notes %}
+            <div>
+                <h4 style="color: #0066cc;">Notes</h4>
+                <p>{{ checkup.notes }}</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Prescriptions -->
+{% if checkup.prescriptions.all %}
+    <div class="card" style="margin-top: 30px;">
+        <div class="card-header">
+            <h3 style="margin: 0;">💊 Prescriptions</h3>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Medication</th>
+                            <th>Dosage</th>
+                            <th>Frequency</th>
+                            <th>Duration</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for prescription in checkup.prescriptions.all %}
+                            <tr>
+                                <td><strong>{{ prescription.medication_name }}</strong></td>
+                                <td>{{ prescription.dosage }}</td>
+                                <td>{{ prescription.frequency }}</td>
+                                <td>{{ prescription.duration }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endif %}
+
+<div style="margin-top: 30px;">
+    {% if request.user.role == 'patient' %}
+        <a href="{% url 'patient_dashboard' %}" class="btn btn-outline">← Back to Dashboard</a>
+    {% else %}
+        <a href="{% url 'doctor_patients_list' %}" class="btn btn-outline">← Back to Patients</a>
+    {% endif %}
+</div>
+{% endblock %}

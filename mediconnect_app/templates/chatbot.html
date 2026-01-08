@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block title %}Chatbot - MediConnect{% endblock %}
+
+{% block content %}
+<div style="max-width: 800px; margin: 0 auto;">
+    <h1>💬 MediConnect Assistant</h1>
+    <p style="color: #999; margin-bottom: 30px;">Ask me anything about appointments, doctors, prescriptions, and more!</p>
+
+    <div style="display: grid; grid-template-columns: 1fr 300px; gap: 30px;">
+        <!-- Chat Area -->
+        <div class="card" style="padding: 20px;">
+            <div id="chatMessages" style="height: 400px; overflow-y: auto; margin-bottom: 20px; padding: 15px; background: #f9f9f9; border-radius: 6px;">
+                <div style="color: #999; text-align: center; margin-top: 100px;">
+                    <p>👋 Hi! I'm here to help. Ask me a question!</p>
+                </div>
+            </div>
+
+            <form method="POST" id="chatForm" style="display: flex; gap: 10px;">
+                {% csrf_token %}
+                <input type="text" name="message" placeholder="Type your question..." class="form-control" id="messageInput" autocomplete="off" required>
+                <button type="submit" class="btn btn-primary">Send</button>
+            </form>
+        </div>
+
+        <!-- Quick Questions -->
+        <div>
+            <div class="card">
+                <div class="card-header">
+                    <h4 style="margin: 0;">Quick Help</h4>
+                </div>
+                <div class="card-body">
+                    <p style="font-size: 13px; color: #999; margin-bottom: 15px;">Ask about:</p>
+                    <div class="list-group" style="box-shadow: none;">
+                        <a href="#" class="list-group-item" onclick="askQuestion('How do I book an appointment?')">Book appointment</a>
+                        <a href="#" class="list-group-item" onclick="askQuestion('How do I find a doctor?')">Find a doctor</a>
+                        <a href="#" class="list-group-item" onclick="askQuestion('How do I view my prescriptions?')">View prescriptions</a>
+                        <a href="#" class="list-group-item" onclick="askQuestion('Where are my medical records?')">Medical records</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function askQuestion(question) {
+    document.getElementById('messageInput').value = question;
+    document.getElementById('chatForm').submit();
+}
+
+{% if response %}
+document.addEventListener('DOMContentLoaded', function() {
+    const chatMessages = document.getElementById('chatMessages');
+    
+    // Add user message
+    const userMsg = document.createElement('div');
+    userMsg.style.cssText = 'margin-bottom: 15px; padding: 10px 15px; background: #0066cc; color: white; border-radius: 8px; max-width: 85%; margin-left: auto; text-align: right;';
+    userMsg.textContent = "{{ request.POST.message }}";
+    chatMessages.appendChild(userMsg);
+    
+    // Add bot response
+    const botMsg = document.createElement('div');
+    botMsg.style.cssText = 'margin-bottom: 15px; padding: 10px 15px; background: #e6e6e6; color: #333; border-radius: 8px; max-width: 85%;';
+    botMsg.textContent = "{{ response }}";
+    chatMessages.appendChild(botMsg);
+    
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+});
+{% endif %}
+</script>
+{% endblock %}

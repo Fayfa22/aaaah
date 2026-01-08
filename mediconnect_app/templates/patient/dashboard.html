@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+
+{% block title %}Patient Dashboard - MediConnect{% endblock %}
+
+{% block content %}
+<h1>Welcome, {{ user.first_name }}! 👋</h1>
+<p style="color: #999; margin-bottom: 30px;">Track your health and manage appointments</p>
+
+<!-- Stats -->
+<div class="stats-grid">
+    <div class="stat-card stat-primary">
+        <div class="stat-label">Upcoming Appointments</div>
+        <div class="stat-value">{{ upcoming_appointments.count }}</div>
+    </div>
+    <div class="stat-card stat-success">
+        <div class="stat-label">Active Medications</div>
+        <div class="stat-value">{{ active_medications.count }}</div>
+    </div>
+    {% if latest_checkup %}
+        <div class="stat-card stat-info">
+            <div class="stat-label">Last Checkup BMI</div>
+            <div class="stat-value">{{ latest_checkup.calculate_bmi }}</div>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Upcoming Appointments -->
+<div class="card">
+    <div class="card-header">
+        <h2>📅 Upcoming Appointments</h2>
+        <a href="{% url 'book_appointment' %}" class="btn btn-primary btn-sm">Book New</a>
+    </div>
+    <div class="card-body">
+        {% if upcoming_appointments %}
+            {% for appointment in upcoming_appointments %}
+                <div class="appointment-item">
+                    <div class="appointment-date">
+                        📆 {{ appointment.date|date:"M d, Y" }} at {{ appointment.time|time:"H:i" }}
+                    </div>
+                    <div class="appointment-doctor">
+                        👨‍⚕️ Dr. {{ appointment.doctor.user.first_name }} {{ appointment.doctor.user.last_name }}
+                    </div>
+                    <div style="font-size: 13px; color: #999; margin-bottom: 10px;">
+                        {{ appointment.doctor.specialization }}
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <strong>Reason:</strong> {{ appointment.reason|truncatewords:10 }}
+                    </div>
+                    <div class="appointment-status">
+                        <span class="badge status-{{ appointment.status }}">{{ appointment.get_status_display }}</span>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p style="color: #999;">No upcoming appointments. <a href="{% url 'book_appointment' %}">Book one now!</a></p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Latest Vital Signs -->
+{% if latest_checkup %}
+<div class="card">
+    <div class="card-header">
+        <h2>💓 Latest Vital Signs</h2>
+        <a href="{% url 'checkup_detail' latest_checkup.id %}" class="btn btn-outline btn-sm">View Details</a>
+    </div>
+    <div class="card-body">
+        <div class="vital-signs-grid">
+            <div class="vital-item">
+                <div class="vital-label">Heart Rate</div>
+                <div class="vital-value">{{ latest_checkup.heart_rate }}<span class="vital-unit">bpm</span></div>
+            </div>
+            <div class="vital-item">
+                <div class="vital-label">Blood Pressure</div>
+                <div class="vital-value">{{ latest_checkup.blood_pressure_systolic }}/{{ latest_checkup.blood_pressure_diastolic }}<span class="vital-unit">mmHg</span></div>
+            </div>
+            <div class="vital-item">
+                <div class="vital-label">Temperature</div>
+                <div class="vital-value">{{ latest_checkup.temperature }}<span class="vital-unit">°F</span></div>
+            </div>
+            <div class="vital-item">
+                <div class="vital-label">Oxygen Saturation</div>
+                <div class="vital-value">{{ latest_checkup.oxygen_saturation }}<span class="vital-unit">%</span></div>
+            </div>
+            <div class="vital-item">
+                <div class="vital-label">Weight</div>
+                <div class="vital-value">{{ latest_checkup.weight }}<span class="vital-unit">kg</span></div>
+            </div>
+            <div class="vital-item">
+                <div class="vital-label">BMI</div>
+                <div class="vital-value">{{ latest_checkup.calculate_bmi }}</div>
+                <div style="font-size: 11px; color: #666; margin-top: 5px;">{{ latest_checkup.get_bmi_category }}</div>
+            </div>
+        </div>
+        <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee;">
+            <p><strong>Diagnosis:</strong> {{ latest_checkup.diagnosis }}</p>
+            {% if latest_checkup.predicted_disease %}
+                <p><strong>Predicted Disease:</strong> <span class="badge badge-warning">{{ latest_checkup.predicted_disease }}</span></p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Active Medications -->
+<div class="card">
+    <div class="card-header">
+        <h2>💊 Active Medications</h2>
+        <a href="{% url 'medications_list' %}" class="btn btn-outline btn-sm">View All</a>
+    </div>
+    <div class="card-body">
+        {% if active_medications %}
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Medication</th>
+                            <th>Dosage</th>
+                            <th>Frequency</th>
+                            <th>Since</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for medication in active_medications|slice:":5" %}
+                            <tr>
+                                <td><strong>{{ medication.medication_name }}</strong></td>
+                                <td>{{ medication.dosage }}</td>
+                                <td>{{ medication.frequency }}</td>
+                                <td>{{ medication.start_date|date:"M d, Y" }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p style="color: #999;">No active medications.</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Quick Links -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 30px;">
+    <a href="{% url 'medical_records_list' %}" class="card" style="padding: 20px; text-align: center; text-decoration: none; color: inherit;">
+        <div style="font-size: 32px; margin-bottom: 10px;">📄</div>
+        <h4 style="margin-bottom: 5px;">Medical Records</h4>
+        <p style="color: #999; margin: 0;">Manage files</p>
+    </a>
+    <a href="{% url 'patient_profile' %}" class="card" style="padding: 20px; text-align: center; text-decoration: none; color: inherit;">
+        <div style="font-size: 32px; margin-bottom: 10px;">👤</div>
+        <h4 style="margin-bottom: 5px;">My Profile</h4>
+        <p style="color: #999; margin: 0;">View details</p>
+    </a>
+    <a href="{% url 'appointments_list' %}" class="card" style="padding: 20px; text-align: center; text-decoration: none; color: inherit;">
+        <div style="font-size: 32px; margin-bottom: 10px;">📋</div>
+        <h4 style="margin-bottom: 5px;">All Appointments</h4>
+        <p style="color: #999; margin: 0;">History</p>
+    </a>
+</div>
+{% endblock %}

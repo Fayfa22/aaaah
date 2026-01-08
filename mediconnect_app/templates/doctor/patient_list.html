@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block title %}My Patients - MediConnect{% endblock %}
+
+{% block content %}
+<h1>👥 My Patients</h1>
+<p style="color: #999; margin-bottom: 30px;">View all your patients</p>
+
+<div class="card">
+    {% if patients %}
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Patient Name</th>
+                        <th>Age</th>
+                        <th>Gender</th>
+                        <th>Phone</th>
+                        <th>Location</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for patient in patients %}
+                        <tr>
+                            <td>
+                                <strong>{{ patient.user.first_name }} {{ patient.user.last_name }}</strong>
+                            </td>
+                            <td>{{ patient.get_age }} years</td>
+                            <td>{{ patient.get_gender_display }}</td>
+                            <td>{{ patient.phone }}</td>
+                            <td>{{ patient.city }}, {{ patient.country }}</td>
+                            <td>
+                                <a href="{% url 'record_checkup' patient.id %}" class="btn btn-sm btn-primary">Record Checkup</a>
+                                <a href="{% url 'doctor_appointments_list' %}" class="btn btn-sm btn-outline">View Appointments</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div style="padding: 40px; text-align: center;">
+            <p style="color: #999;">No patients yet. Patients appear here after they book appointments with you.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block title %}Appointments - MediConnect{% endblock %}
+
+{% block content %}
+<h1>📋 Your Appointments</h1>
+<p style="color: #999; margin-bottom: 30px;">View and manage all your scheduled appointments</p>
+
+<div style="display: flex; gap: 15px; margin-bottom: 30px;">
+    <a href="{% url 'book_appointment' %}" class="btn btn-primary">+ Book New Appointment</a>
+    <a href="{% url 'patient_dashboard' %}" class="btn btn-outline">Back to Dashboard</a>
+</div>
+
+{% if appointments %}
+    <div style="display: grid; gap: 20px;">
+        {% regroup appointments by date as appointments_by_date %}
+        {% for date_group, appointments_in_date in appointments_by_date %}
+            <div>
+                <h3 style="color: #0066cc; margin-bottom: 15px;">
+                    📅 {{ date_group|date:"F d, Y" }}
+                </h3>
+                
+                {% for appointment in appointments_in_date %}
+                    <a href="{% url 'appointment_detail' appointment.id %}" style="text-decoration: none;">
+                        <div class="card" style="cursor: pointer; margin-bottom: 15px;">
+                            <div style="display: grid; grid-template-columns: 1fr auto auto auto; gap: 20px; align-items: center;">
+                                <div>
+                                    <h4 style="margin-bottom: 8px;">Dr. {{ appointment.doctor.user.first_name }} {{ appointment.doctor.user.last_name }}</h4>
+                                    <p style="color: #999; margin: 0;">{{ appointment.doctor.specialization }} • {{ appointment.doctor.clinic_name }}</p>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="font-size: 18px; font-weight: 600; color: #0066cc;">{{ appointment.time|time:"H:i" }}</div>
+                                    <small style="color: #999;">{{ appointment.get_status_display }}</small>
+                                </div>
+                                <div>
+                                    <span class="badge status-{{ appointment.status }}">{{ appointment.get_status_display|upper }}</span>
+                                </div>
+                                <div style="text-align: right;">
+                                    <span style="color: #0066cc; font-weight: 600;">→</span>
+                                </div>
+                            </div>
+                            {% if appointment.reason %}
+                                <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee;">
+                                    <p style="color: #666; margin: 0;"><strong>Reason:</strong> {{ appointment.reason|truncatewords:15 }}</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </a>
+                {% endfor %}
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="card" style="text-align: center; padding: 60px 20px;">
+        <div style="font-size: 48px; margin-bottom: 20px;">📭</div>
+        <h3>No Appointments Yet</h3>
+        <p style="color: #999; margin-bottom: 20px;">You haven't booked any appointments yet. Start by scheduling your first consultation.</p>
+        <a href="{% url 'book_appointment' %}" class="btn btn-primary">Book Appointment Now</a>
+    </div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete Medical Record - MediConnect{% endblock %}
+
+{% block content %}
+<div style="max-width: 500px; margin: 100px auto;">
+    <div class="card">
+        <div style="padding: 30px; text-align: center;">
+            <div style="font-size: 48px; margin-bottom: 20px; color: #ff4444;">⚠️</div>
+            <h2 style="color: #ff4444;">Delete Medical Record?</h2>
+            <p style="color: #666; margin: 20px 0;">Are you sure you want to delete this medical record? This action cannot be undone.</p>
+            
+            <div style="padding: 15px; background: #f9f9f9; border-radius: 6px; margin: 20px 0; text-align: left;">
+                <p><strong>Document:</strong> {{ record.description|default:"Medical Document" }}</p>
+                <p><strong>Uploaded:</strong> {{ record.uploaded_at|date:"F d, Y" }}</p>
+            </div>
+
+            <form method="POST" style="display: flex; gap: 10px; justify-content: center;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger btn-lg">Delete Permanently</button>
+                <a href="{% url 'medical_records_list' %}" class="btn btn-outline btn-lg">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
