@@ -6,29 +6,30 @@
 <div class="auth-container" style="padding: 40px 20px;">
     <div class="auth-form" style="max-width: 600px;">
         <h1>Patient Registration</h1>
-        <p style="text-align: center; color: #999; margin-bottom: 30px;">Create your account and start managing your health</p>
+        <p style="text-align: center; color: #999; margin-bottom: 30px;">Create your account and start managing your
+            health</p>
 
         {% if form.non_field_errors %}
-            <div class="alert alert-danger">
-                {% for error in form.non_field_errors %}
-                    <p>{{ error }}</p>
-                {% endfor %}
-            </div>
+        <div class="alert alert-danger">
+            {% for error in form.non_field_errors %}
+            <p>{{ error }}</p>
+            {% endfor %}
+        </div>
         {% endif %}
 
         <form method="POST">
             {% csrf_token %}
 
             <h4 style="margin-top: 30px; margin-bottom: 15px; color: #0066cc;">Personal Information</h4>
-            
+
             <div class="form-row">
                 <div class="form-group">
                     <label for="id_first_name">First Name</label>
                     {{ form.first_name }}
                     {% if form.first_name.errors %}
-                        {% for error in form.first_name.errors %}
-                            <span class="error-message">{{ error }}</span>
-                        {% endfor %}
+                    {% for error in form.first_name.errors %}
+                    <span class="error-message">{{ error }}</span>
+                    {% endfor %}
                     {% endif %}
                 </div>
 
@@ -36,9 +37,9 @@
                     <label for="id_last_name">Last Name</label>
                     {{ form.last_name }}
                     {% if form.last_name.errors %}
-                        {% for error in form.last_name.errors %}
-                            <span class="error-message">{{ error }}</span>
-                        {% endfor %}
+                    {% for error in form.last_name.errors %}
+                    <span class="error-message">{{ error }}</span>
+                    {% endfor %}
                     {% endif %}
                 </div>
             </div>
@@ -47,9 +48,9 @@
                 <label for="id_email">Email Address</label>
                 {{ form.email }}
                 {% if form.email.errors %}
-                    {% for error in form.email.errors %}
-                        <span class="error-message">{{ error }}</span>
-                    {% endfor %}
+                {% for error in form.email.errors %}
+                <span class="error-message">{{ error }}</span>
+                {% endfor %}
                 {% endif %}
             </div>
 
@@ -57,9 +58,9 @@
                 <label for="id_phone">Phone (8 digits)</label>
                 {{ form.phone }}
                 {% if form.phone.errors %}
-                    {% for error in form.phone.errors %}
-                        <span class="error-message">{{ error }}</span>
-                    {% endfor %}
+                {% for error in form.phone.errors %}
+                <span class="error-message">{{ error }}</span>
+                {% endfor %}
                 {% endif %}
             </div>
 
@@ -68,21 +69,27 @@
                     <label for="id_date_of_birth">Date of Birth</label>
                     {{ form.date_of_birth }}
                     {% if form.date_of_birth.errors %}
-                        {% for error in form.date_of_birth.errors %}
-                            <span class="error-message">{{ error }}</span>
-                        {% endfor %}
+                    {% for error in form.date_of_birth.errors %}
+                    <span class="error-message">{{ error }}</span>
+                    {% endfor %}
                     {% endif %}
                 </div>
 
                 <div class="form-group">
                     <label>Gender</label>
-                    <div style="margin-top: 10px;">
-                        {{ form.gender }}
+                    <div style="margin-top: 10px; display: flex; gap: 20px;">
+                        {% for value, label in form.gender.field.choices %}
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <input type="radio" name="gender" value="{{ value }}" {% if form.gender.value==value
+                                %}checked{% endif %} style="cursor: pointer;">
+                            <span>{{ label }}</span>
+                        </label>
+                        {% endfor %}
                     </div>
                     {% if form.gender.errors %}
-                        {% for error in form.gender.errors %}
-                            <span class="error-message">{{ error }}</span>
-                        {% endfor %}
+                    {% for error in form.gender.errors %}
+                    <span class="error-message">{{ error }}</span>
+                    {% endfor %}
                     {% endif %}
                 </div>
             </div>
@@ -92,9 +99,9 @@
                     <label for="id_city">City</label>
                     {{ form.city }}
                     {% if form.city.errors %}
-                        {% for error in form.city.errors %}
-                            <span class="error-message">{{ error }}</span>
-                        {% endfor %}
+                    {% for error in form.city.errors %}
+                    <span class="error-message">{{ error }}</span>
+                    {% endfor %}
                     {% endif %}
                 </div>
 
@@ -102,9 +109,9 @@
                     <label for="id_country">Country</label>
                     {{ form.country }}
                     {% if form.country.errors %}
-                        {% for error in form.country.errors %}
-                            <span class="error-message">{{ error }}</span>
-                        {% endfor %}
+                    {% for error in form.country.errors %}
+                    <span class="error-message">{{ error }}</span>
+                    {% endfor %}
                     {% endif %}
                 </div>
             </div>
@@ -116,9 +123,9 @@
                 {{ form.password }}
                 <small style="color: #999;">Min 7 characters, 1 digit, 1 uppercase letter</small>
                 {% if form.password.errors %}
-                    {% for error in form.password.errors %}
-                        <span class="error-message">{{ error }}</span>
-                    {% endfor %}
+                {% for error in form.password.errors %}
+                <span class="error-message">{{ error }}</span>
+                {% endfor %}
                 {% endif %}
             </div>
 
@@ -126,9 +133,9 @@
                 <label for="id_confirm_password">Confirm Password</label>
                 {{ form.confirm_password }}
                 {% if form.confirm_password.errors %}
-                    {% for error in form.confirm_password.errors %}
-                        <span class="error-message">{{ error }}</span>
-                    {% endfor %}
+                {% for error in form.confirm_password.errors %}
+                <span class="error-message">{{ error }}</span>
+                {% endfor %}
                 {% endif %}
             </div>
 

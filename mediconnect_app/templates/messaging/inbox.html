@@ -27,8 +27,13 @@
                 {% for message in received_messages %}
                 <div class="list-group-item" style="cursor: default;">
                     <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                        <strong style="color: #333;">From: {{ message.sender.first_name }} {{ message.sender.last_name
-                            }}</strong>
+                        <strong style="color: #333;">From:
+                            {% if message.sender.role == 'doctor' %}
+                            Dr. {{ message.sender.last_name }}
+                            {% else %}
+                            {{ message.sender.first_name }} {{ message.sender.last_name }}
+                            {% endif %}
+                        </strong>
                         <small style="color: #999;">{{ message.created_at|date:"M d, H:i" }}</small>
                     </div>
                     <div style="font-weight: 500; margin-bottom: 5px;">{{ message.subject }}</div>
@@ -47,8 +52,13 @@
                 {% for message in sent_messages %}
                 <div class="list-group-item" style="cursor: default;">
                     <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                        <strong style="color: #333;">To: {{ message.recipient.first_name }} {{
-                            message.recipient.last_name }}</strong>
+                        <strong style="color: #333;">To:
+                            {% if message.recipient.role == 'doctor' %}
+                            Dr. {{ message.recipient.last_name }}
+                            {% else %}
+                            {{ message.recipient.first_name }} {{ message.recipient.last_name }}
+                            {% endif %}
+                        </strong>
                         <small style="color: #999;">{{ message.created_at|date:"M d, H:i" }}</small>
                     </div>
                     <div style="font-weight: 500; margin-bottom: 5px;">{{ message.subject }}</div>

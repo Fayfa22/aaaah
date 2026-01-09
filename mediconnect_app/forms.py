@@ -154,9 +154,7 @@ class PatientSignUpForm(forms.Form):
         'class': 'form-control',
         'type': 'date'
     }))
-    gender = forms.ChoiceField(choices=GENDER_CHOICES, widget=forms.RadioSelect(attrs={
-        'class': 'form-check-input'
-    }))
+    gender = forms.ChoiceField(choices=GENDER_CHOICES, widget=forms.RadioSelect())
     city = forms.CharField(max_length=50, widget=forms.TextInput(attrs={
         'class': 'form-control',
         'placeholder': 'City'
