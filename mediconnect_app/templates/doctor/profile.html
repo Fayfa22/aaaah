@@ -3,7 +3,10 @@
 {% block title %}Doctor Profile - MediConnect{% endblock %}
 
 {% block content %}
-<h1>👨‍⚕️ Doctor Profile</h1>
+<div style="display: flex; justify-content: space-between; align-items: center;">
+    <h1>👨‍⚕️ Doctor Profile</h1>
+    <a href="{% url 'edit_doctor_profile' %}" class="btn btn-outline-primary">Edit Profile</a>
+</div>
 
 <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 30px; margin-top: 30px;">
     <!-- Professional Card -->
@@ -14,7 +17,8 @@
         <div class="card-body">
             <div style="margin-bottom: 20px;">
                 <label style="color: #999; font-size: 12px; text-transform: uppercase;">Full Name</label>
-                <div style="font-size: 18px; font-weight: 600;">Dr. {{ doctor.user.first_name }} {{ doctor.user.last_name }}</div>
+                <div style="font-size: 18px; font-weight: 600;">Dr. {{ doctor.user.first_name }} {{
+                    doctor.user.last_name }}</div>
             </div>
 
             <div style="margin-bottom: 20px;">
@@ -66,18 +70,22 @@
                 </div>
 
                 <div style="background: #f9f9f9; padding: 15px; border-radius: 6px; margin-bottom: 25px;">
-                    <label style="color: #999; font-size: 12px; text-transform: uppercase; margin-bottom: 8px; display: block;">Working Hours</label>
+                    <label
+                        style="color: #999; font-size: 12px; text-transform: uppercase; margin-bottom: 8px; display: block;">Working
+                        Hours</label>
                     <div style="font-weight: 600;">{{ doctor.working_hours }}</div>
                 </div>
 
                 <!-- Statistics -->
                 <div style="display: grid; gap: 15px;">
                     <div style="padding: 15px; background: #e6f0ff; border-radius: 6px;">
-                        <div style="font-size: 12px; color: #0066cc; text-transform: uppercase; margin-bottom: 5px;">Specialization</div>
+                        <div style="font-size: 12px; color: #0066cc; text-transform: uppercase; margin-bottom: 5px;">
+                            Specialization</div>
                         <div style="font-weight: 600;">{{ doctor.specialization }}</div>
                     </div>
                     <div style="padding: 15px; background: #e6f9f0; border-radius: 6px;">
-                        <div style="font-size: 12px; color: #008c47; text-transform: uppercase; margin-bottom: 5px;">Experience</div>
+                        <div style="font-size: 12px; color: #008c47; text-transform: uppercase; margin-bottom: 5px;">
+                            Experience</div>
                         <div style="font-weight: 600;">{{ doctor.years_of_experience }} years</div>
                     </div>
                 </div>

@@ -1,0 +1,220 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Symptom Checker - MediConnect{% endblock %}
+
+{% block content %}
+<div style="max-width: 1000px; margin: 0 auto;">
+    <div class="card">
+        <h1 style="color: #0b8fac; margin-bottom: 10px;">🩺 Symptom Checker & Disease Prediction</h1>
+        <p style="color: #666; margin-bottom: 30px;">Select your symptoms to get a preliminary analysis.</p>
+
+        <form id="intakeForm" onsubmit="return false;">
+
+            <!-- Symptoms Section -->
+            <div style="margin-bottom: 30px;">
+                <h3 style="font-size: 18px; font-weight: 500; margin-bottom: 15px;">Select Symptoms</h3>
+                <div id="symptomsContainer"
+                    style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; max-height: 400px; overflow-y: auto; padding: 15px; background: #f9f9f9; border-radius: 8px; border: 1px solid #eee;">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+
+            <!-- Analysis Section -->
+            <div style="display: flex; gap: 15px; align-items: center;">
+                <button type="button" id="analyzeBtn" class="btn btn-primary"
+                    style="padding: 12px 25px; font-size: 16px;">
+                    🔍 Analyze Symptoms
+                </button>
+                <button type="reset" class="btn btn-outline" style="padding: 12px 25px;">Reset</button>
+            </div>
+
+        </form>
+
+        <!-- Results -->
+        <div id="predictionResults" style="margin-top: 30px; display: none;">
+            <div
+                style="background: linear-gradient(to right, #eef7ff, #f0fdfa); border-radius: 12px; padding: 25px; border-left: 5px solid #0b8fac;">
+                <h2 style="color: #0b8fac; margin-top: 0; display: flex; align-items: center; gap: 10px;">
+                    <span>🔬</span> Analysis Results
+                </h2>
+                <div id="predictionContent" style="margin-top: 20px;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Symptom list and Logic from User's Template
+    const symptoms = [
+        'itching', 'skin_rash', 'nodal_skin_eruptions', 'continuous_sneezing', 'shivering', 'chills',
+        'joint_pain', 'stomach_pain', 'acidity', 'ulcers_on_tongue', 'muscle_wasting', 'vomiting',
+        'burning_micturition', 'spotting_ urination', 'fatigue', 'weight_gain', 'anxiety', 'cold_hands_and_feets',
+        'mood_swings', 'weight_loss', 'restlessness', 'lethargy', 'patches_in_throat', 'irregular_sugar_level',
+        'cough', 'high_fever', 'sunken_eyes', 'breathlessness', 'sweating', 'dehydration', 'indigestion', 'headache',
+        'yellowish_skin', 'dark_urine', 'nausea', 'loss_of_appetite', 'pain_behind_the_eyes', 'back_pain',
+        'constipation', 'abdominal_pain', 'diarrhoea', 'mild_fever', 'yellow_urine', 'yellowing_of_eyes',
+        'acute_liver_failure', 'fluid_overload', 'swelling_of_stomach', 'swelled_lymph_nodes', 'malaise',
+        'blurred_and_distorted_vision', 'phlegm', 'throat_irritation', 'redness_of_eyes', 'sinus_pressure',
+        'runny_nose', 'congestion', 'chest_pain', 'weakness_in_limbs', 'fast_heart_rate', 'pain_during_bowel_movements',
+        'pain_in_anal_region', 'bloody_stool', 'irritation_in_anus', 'neck_pain', 'dizziness', 'cramps',
+        'bruising', 'obesity', 'swollen_legs', 'swollen_blood_vessels', 'puffy_face_and_eyes', 'enlarged_thyroid',
+        'brittle_nails', 'swollen_extremeties', 'excessive_hunger', 'extra_marital_contacts', 'drying_and_tingling_lips',
+        'slurred_speech', 'knee_pain', 'hip_joint_pain', 'muscle_weakness', 'stiff_neck', 'swelling_joints',
+        'movement_stiffness', 'spinning_movements', 'loss_of_balance', 'unsteadiness', 'weakness_of_one_body_side',
+        'loss_of_smell', 'bladder_discomfort', 'foul_smell_of urine', 'continuous_feel_of_urine', 'passage_of_gases',
+        'internal_itching', 'toxic_look_(typhos)', 'depression', 'irritability', 'muscle_pain', 'altered_sensorium',
+        'red_spots_over_body', 'belly_pain', 'abnormal_menstruation', 'dischromic _patches', 'watering_from_eyes',
+        'increased_appetite', 'polyuria', 'family_history', 'mucoid_sputum', 'rusty_sputum', 'lack_of_concentration',
+        'visual_disturbances', 'receiving_blood_transfusion', 'receiving_unsterile_injections', 'coma',
+        'stomach_bleeding', 'distention_of_abdomen', 'history_of_alcohol_consumption', 'fluid_overload',
+        'blood_in_sputum', 'prominent_veins_on_calf', 'palpitations', 'painful_walking', 'pus_filled_pimples',
+        'blackheads', 'scurring', 'skin_peeling', 'silver_like_dusting', 'small_dents_in_nails', 'inflammatory_nails',
+        'blister', 'red_sore_around_nose', 'yellow_crust_ooze'
+    ];
+
+    const diseasePatterns = {
+        'Fungal infection': ['itching', 'skin_rash', 'nodal_skin_eruptions'],
+        'Allergy': ['continuous_sneezing', 'shivering', 'chills'],
+        'GERD': ['stomach_pain', 'acidity', 'ulcers_on_tongue', 'vomiting', 'cough'],
+        'Chronic cholestasis': ['itching', 'vomiting', 'yellowish_skin', 'nausea', 'loss_of_appetite', 'abdominal_pain'],
+        'Drug Reaction': ['skin_rash', 'stomach_pain', 'burning_micturition', 'spotting_ urination'],
+        'Peptic ulcer diseae': ['vomiting', 'dehydration', 'indigestion', 'abdominal_pain', 'passage_of_gases'],
+        'AIDS': ['ulcers_on_tongue', 'patches_in_throat', 'high_fever', 'extra_marital_contacts'],
+        'Diabetes ': ['fatigue', 'weight_loss', 'restlessness', 'lethargy', 'irregular_sugar_level', 'polyuria', 'family_history'],
+        'Gastroenteritis': ['vomiting', 'sunken_eyes', 'dehydration', 'diarrhoea'],
+        'Bronchial Asthma': ['fatigue', 'cough', 'high_fever', 'breathlessness', 'mucoid_sputum', 'rusty_sputum'],
+        'Hypertension ': ['indigestion', 'chest_pain', 'fast_heart_rate', 'palpitations'],
+        'Migraine': ['acidity', 'indigestion', 'headache', 'blurred_and_distorted_vision', 'depression', 'irritability'],
+        'Cervical spondylosis': ['back_pain', 'neck_pain', 'dizziness', 'loss_of_balance'],
+        'Paralysis (brain hemorrhage)': ['vomiting', 'headache', 'weakness_of_one_body_side'],
+        'Jaundice': ['itching', 'vomiting', 'fatigue', 'high_fever', 'yellowish_skin', 'dark_urine', 'weight_loss', 'abdominal_pain'],
+        'Malaria': ['chills', 'vomiting', 'high_fever', 'headache', 'nausea', 'sweating'],
+        'Chicken pox': ['skin_rash', 'fatigue', 'lethargy', 'high_fever', 'headache', 'mild_fever', 'swelled_lymph_nodes', 'malaise', 'redness_of_eyes'],
+        'Dengue': ['skin_rash', 'chills', 'fatigue', 'high_fever', 'headache', 'nausea', 'loss_of_appetite', 'pain_behind_the_eyes', 'malaise', 'redness_of_eyes'],
+        'Typhoid': ['chills', 'vomiting', 'fatigue', 'high_fever', 'headache', 'nausea', 'abdominal_pain', 'diarrhoea'],
+        'hepatitis A': ['chills', 'vomiting', 'yellowish_skin', 'dark_urine', 'nausea', 'loss_of_appetite', 'abdominal_pain', 'diarrhoea', 'mild_fever', 'yellowing_of_eyes'],
+        'Hepatitis B': ['itching', 'fatigue', 'lethargy', 'yellowish_skin', 'dark_urine', 'loss_of_appetite', 'abdominal_pain', 'yellow_urine', 'yellowing_of_eyes', 'receiving_blood_transfusion', 'receiving_unsterile_injections'],
+        'Hepatitis C': ['fatigue', 'yellowish_skin', 'nausea', 'loss_of_appetite', 'yellowing_of_eyes', 'receiving_unsterile_injections'],
+        'Hepatitis D': ['chills', 'vomiting', 'fatigue', 'yellowish_skin', 'dark_urine', 'nausea', 'loss_of_appetite', 'abdominal_pain', 'yellowing_of_eyes'],
+        'Hepatitis E': ['chills', 'vomiting', 'fatigue', 'high_fever', 'yellowish_skin', 'dark_urine', 'nausea', 'loss_of_appetite', 'abdominal_pain', 'yellowing_of_eyes', 'receiving_blood_transfusion'],
+        'Alcoholic hepatitis': ['vomiting', 'yellowish_skin', 'swelling_of_stomach', 'history_of_alcohol_consumption', 'fluid_overload'],
+        'Tuberculosis': ['chills', 'vomiting', 'fatigue', 'weight_loss', 'cough', 'high_fever', 'breathlessness', 'sweating', 'mucoid_sputum', 'rusty_sputum', 'blood_in_sputum'],
+        'Common Cold': ['continuous_sneezing', 'chills', 'fatigue', 'cough', 'high_fever', 'headache', 'runny_nose', 'congestion', 'sinus_pressure', 'throat_irritation', 'mucoid_sputum'],
+        'Pneumonia': ['chills', 'fatigue', 'cough', 'high_fever', 'breathlessness', 'sweating', 'mucoid_sputum', 'rusty_sputum', 'blood_in_sputum'],
+        'Dimorphic hemmorhoids(piles)': ['constipation', 'pain_during_bowel_movements', 'pain_in_anal_region', 'bloody_stool', 'irritation_in_anus'],
+        'Heart attack': ['vomiting', 'chest_pain', 'sweating'],
+        'Varicose veins': ['fatigue', 'swollen_legs', 'swollen_blood_vessels', 'painful_walking'],
+        'Hypothyroidism': ['fatigue', 'weight_gain', 'cold_hands_and_feets', 'mood_swings', 'lethargy', 'dizziness', 'obesity', 'puffy_face_and_eyes', 'enlarged_thyroid', 'brittle_nails', 'swollen_extremeties', 'depression', 'irritability'],
+        'Hyperthyroidism': ['fatigue', 'mood_swings', 'sweating', 'dizziness', 'excessive_hunger', 'increased_appetite', 'irritability'],
+        'Hypoglycemia': ['vomiting', 'fatigue', 'sweating', 'headache', 'dizziness', 'excessive_hunger', 'increased_appetite', 'irregular_sugar_level'],
+        'Osteoarthristis': ['chills', 'joint_pain', 'knee_pain', 'hip_joint_pain'],
+        'Arthritis': ['swelling_joints', 'movement_stiffness', 'painful_walking'],
+        '(vertigo) Paroymsal  Positional Vertigo': ['vomiting', 'headache', 'dizziness', 'spinning_movements', 'loss_of_balance', 'unsteadiness'],
+        'Acne': ['skin_rash', 'pus_filled_pimples', 'blackheads'],
+        'Urinary tract infection': ['burning_micturition', 'bladder_discomfort', 'foul_smell_of urine'],
+        'Psoriasis': ['skin_rash', 'joint_pain', 'skin_peeling'],
+        'Impetigo': ['skin_rash', 'high_fever', 'blister', 'red_sore_around_nose', 'yellow_crust_ooze']
+    };
+
+    function formatSymptomName(symptom) {
+        return symptom.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    }
+
+    function populateSymptoms() {
+        const container = document.getElementById('symptomsContainer');
+        symptoms.forEach(symptom => {
+            const div = document.createElement('div');
+            div.style.cssText = 'display: flex; align-items: center;';
+            div.innerHTML = `
+          <input type="checkbox" name="symptom[]" value="${symptom}" class="symptom-checkbox" style="margin-right: 8px; width: 16px; height: 16px;">
+          <span style="font-size: 14px;">${formatSymptomName(symptom)}</span>
+        `;
+            container.appendChild(div);
+        });
+    }
+
+    function calculateDiseaseProbabilities(selectedSymptoms) {
+        const predictions = {};
+        Object.keys(diseasePatterns).forEach(disease => {
+            const pattern = diseasePatterns[disease];
+            const matchedSymptoms = pattern.filter(symptom => selectedSymptoms.includes(symptom));
+            const matchCount = matchedSymptoms.length;
+            const patternLength = pattern.length;
+
+            if (matchCount > 0) {
+                const baseProbability = (matchCount / patternLength) * 100;
+                const adjustmentFactor = Math.min(1, patternLength / (selectedSymptoms.length + 1));
+                const finalProbability = Math.min(95, baseProbability * (1 + adjustmentFactor * 0.2));
+                predictions[disease] = {
+                    probability: finalProbability,
+                    matchedSymptoms: matchedSymptoms,
+                    totalSymptoms: patternLength
+                };
+            }
+        });
+        return Object.entries(predictions)
+            .sort((a, b) => b[1].probability - a[1].probability)
+            .slice(0, 5);
+    }
+
+    function displayPredictions(predictions) {
+        const resultsSection = document.getElementById('predictionResults');
+        const contentDiv = document.getElementById('predictionContent');
+
+        if (predictions.length === 0) {
+            contentDiv.innerHTML = `<div style="padding: 15px; color: #856404; background-color: #fff3cd; border: 1px solid #ffeeba; border-radius: 4px;">No specific matches found. Please consult a doctor.</div>`;
+            resultsSection.style.display = 'block';
+            return;
+        }
+
+        let html = '<div style="display: flex; flex-direction: column; gap: 15px;">';
+
+        predictions.forEach(([disease, data], index) => {
+            const probability = Math.round(data.probability);
+            let color = probability >= 70 ? '#dc3545' : probability >= 50 ? '#fd7e14' : '#ffc107';
+
+            html += `
+          <div style="background: white; padding: 15px; border-radius: 8px; border-left: 4px solid ${color}; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                <h3 style="margin: 0; font-size: 16px;">${index + 1}. ${disease}</h3>
+                <span style="font-weight: bold; color: ${color};">${probability}%</span>
+            </div>
+            <div style="width: 100%; height: 8px; background: #eee; border-radius: 4px; margin-bottom: 8px;">
+                <div style="width: ${probability}%; height: 100%; background: ${color}; border-radius: 4px;"></div>
+            </div>
+            <p style="margin: 0; font-size: 13px; color: #666;">
+                <strong>Matched:</strong> ${data.matchedSymptoms.map(s => formatSymptomName(s)).join(', ')}
+            </p>
+          </div>
+        `;
+        });
+
+        html += '</div>';
+        contentDiv.innerHTML = html;
+        resultsSection.style.display = 'block';
+        resultsSection.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    document.getElementById('analyzeBtn').addEventListener('click', function () {
+        const selectedSymptoms = Array.from(document.querySelectorAll('.symptom-checkbox:checked')).map(cb => cb.value);
+        if (selectedSymptoms.length === 0) {
+            alert('Please select at least one symptom.');
+            return;
+        }
+
+        const btn = this;
+        btn.innerHTML = '🔄 Analyzing...';
+        btn.disabled = true;
+
+        setTimeout(() => {
+            const predictions = calculateDiseaseProbabilities(selectedSymptoms);
+            displayPredictions(predictions);
+            btn.innerHTML = '🔍 Analyze Symptoms';
+            btn.disabled = false;
+        }, 600);
+    });
+
+    populateSymptoms();
+</script>
+{% endblock %}

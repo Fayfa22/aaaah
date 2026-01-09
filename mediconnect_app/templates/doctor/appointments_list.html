@@ -10,9 +10,10 @@
 <div style="margin-bottom: 25px;">
     <form method="GET" style="display: flex; gap: 10px; flex-wrap: wrap;">
         {% for status in status_choices %}
-            <a href="?status={{ status }}" class="btn {% if status == selected_status or not selected_status and status == 'scheduled' %}btn-primary{% else %}btn-outline{% endif %} btn-sm">
-                {{ status|upper }} ({{ appointments|length }})
-            </a>
+        <a href="?status={{ status }}"
+            class="btn {% if status == selected_status or not selected_status and status == 'scheduled' %}btn-primary{% else %}btn-outline{% endif %} btn-sm">
+            {{ status|upper }} ({{ appointments|length }})
+        </a>
         {% endfor %}
         <a href="?" class="btn btn-outline btn-sm">All</a>
     </form>
@@ -21,47 +22,65 @@
 <!-- Appointments List -->
 <div class="card">
     {% if appointments %}
-        <div class="table-responsive">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Patient</th>
-                        <th>Date & Time</th>
-                        <th>Reason</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for appointment in appointments %}
-                        <tr>
-                            <td>
-                                <strong>{{ appointment.patient.user.first_name }} {{ appointment.patient.user.last_name }}</strong>
-                                <div style="font-size: 12px; color: #999;">📞 {{ appointment.patient.phone }}</div>
-                            </td>
-                            <td>
-                                📅 {{ appointment.date|date:"M d, Y" }}<br>
-                                🕐 {{ appointment.time|time:"H:i" }}
-                            </td>
-                            <td>{{ appointment.reason|truncatewords:10 }}</td>
-                            <td>
-                                <span class="badge status-{{ appointment.status }}">{{ appointment.get_status_display }}</span>
-                            </td>
-                            <td>
-                                <a href="{% url 'appointment_detail' appointment.id %}" class="btn btn-sm btn-primary">View</a>
-                                {% if appointment.status == 'confirmed' and not appointment.checkup %}
-                                    <a href="{% url 'record_checkup' appointment.patient.id %}" class="btn btn-sm btn-secondary">Checkup</a>
-                                {% endif %}
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Patient</th>
+                    <th>Date & Time</th>
+                    <th>Reason</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for appointment in appointments %}
+                <tr>
+                    <td>
+                        <strong>{{ appointment.patient.user.first_name }} {{ appointment.patient.user.last_name
+                            }}</strong>
+                        <div style="font-size: 12px; color: #999;">📞 {{ appointment.patient.phone }}</div>
+                    </td>
+                    <td>
+                        📅 {{ appointment.date|date:"M d, Y" }}<br>
+                        🕐 {{ appointment.time|time:"H:i" }}
+                    </td>
+                    <td>{{ appointment.reason|truncatewords:10 }}</td>
+                    <td>
+                        {% if appointment.status == 'in_progress' %}
+                        <span class="badge badge-warning">IN PROGRESS</span>
+                        {% elif appointment.status == 'completed' %}
+                        <span class="badge badge-success">COMPLETED</span>
+                        {% else %}
+                        <span class="badge status-{{ appointment.status }}">{{ appointment.get_status_display|upper
+                            }}</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{% url 'appointment_detail' appointment.id %}" class="btn btn-sm btn-primary">View</a>
+
+                        {% if appointment.status == 'confirmed' or appointment.status == 'scheduled' %}
+                        <a href="{% url 'update_appointment_status' appointment.id 'in_progress' %}"
+                            class="btn btn-sm btn-success">Start</a>
+                        {% elif appointment.status == 'in_progress' %}
+                        <a href="{% url 'update_appointment_status' appointment.id 'completed' %}"
+                            class="btn btn-sm btn-warning">Complete</a>
+                        <a href="{% url 'record_checkup' appointment.patient.id %}"
+                            class="btn btn-sm btn-secondary">Checkup</a>
+                        {% elif appointment.status == 'confirmed' and not appointment.checkup %}
+                        <a href="{% url 'record_checkup' appointment.patient.id %}"
+                            class="btn btn-sm btn-secondary">Checkup</a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
     {% else %}
-        <div style="padding: 40px; text-align: center;">
-            <p style="color: #999;">No appointments found.</p>
-        </div>
+    <div style="padding: 40px; text-align: center;">
+        <p style="color: #999;">No appointments found.</p>
+    </div>
     {% endif %}
 </div>
 {% endblock %}

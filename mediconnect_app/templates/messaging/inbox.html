@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% block title %}Inbox - MediConnect{% endblock %}
+
+{% block content %}
+<div style="max-width: 900px; margin: 40px auto; padding: 0 20px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <h1>📬 Test Inbox</h1>
+        <a href="{% url 'send_message' %}" class="btn btn-primary">New Message</a>
+    </div>
+
+    <div class="card">
+        <ul class="nav nav-tabs" style="border-bottom: 1px solid #eee; margin-bottom: 20px;">
+            <li class="nav-item">
+                <a class="nav-link active" onclick="showTab('received')" id="tab-received"
+                    style="cursor: pointer; font-weight: bold; border-bottom: 2px solid #0066cc; color: #0066cc;">Received</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" onclick="showTab('sent')" id="tab-sent"
+                    style="cursor: pointer; color: #666;">Sent</a>
+            </li>
+        </ul>
+
+        <div id="received-messages">
+            {% if received_messages %}
+            <div class="list-group">
+                {% for message in received_messages %}
+                <div class="list-group-item" style="cursor: default;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                        <strong style="color: #333;">From: {{ message.sender.first_name }} {{ message.sender.last_name
+                            }}</strong>
+                        <small style="color: #999;">{{ message.created_at|date:"M d, H:i" }}</small>
+                    </div>
+                    <div style="font-weight: 500; margin-bottom: 5px;">{{ message.subject }}</div>
+                    <p style="color: #666; font-size: 0.95rem; margin: 0;">{{ message.body }}</p>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p style="text-align: center; color: #999; padding: 20px;">No received messages.</p>
+            {% endif %}
+        </div>
+
+        <div id="sent-messages" style="display: none;">
+            {% if sent_messages %}
+            <div class="list-group">
+                {% for message in sent_messages %}
+                <div class="list-group-item" style="cursor: default;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                        <strong style="color: #333;">To: {{ message.recipient.first_name }} {{
+                            message.recipient.last_name }}</strong>
+                        <small style="color: #999;">{{ message.created_at|date:"M d, H:i" }}</small>
+                    </div>
+                    <div style="font-weight: 500; margin-bottom: 5px;">{{ message.subject }}</div>
+                    <p style="color: #666; font-size: 0.95rem; margin: 0;">{{ message.body }}</p>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p style="text-align: center; color: #999; padding: 20px;">No sent messages.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+    function showTab(tabName) {
+        document.getElementById('received-messages').style.display = tabName === 'received' ? 'block' : 'none';
+        document.getElementById('sent-messages').style.display = tabName === 'sent' ? 'block' : 'none';
+
+        document.getElementById('tab-received').style.borderBottom = tabName === 'received' ? '2px solid #0066cc' : 'none';
+        document.getElementById('tab-received').style.color = tabName === 'received' ? '#0066cc' : '#666';
+
+        document.getElementById('tab-sent').style.borderBottom = tabName === 'sent' ? '2px solid #0066cc' : 'none';
+        document.getElementById('tab-sent').style.color = tabName === 'sent' ? '#0066cc' : '#666';
+    }
+</script>
+{% endblock %}

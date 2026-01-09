@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Patient Details - MediConnect{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-between align-center mb-4">
+    <div>
+        <h1>{{ patient.user.first_name }} {{ patient.user.last_name }}</h1>
+        <p class="text-muted">Patient Profile</p>
+    </div>
+    <div class="btn-group">
+        <a href="{% url 'record_checkup' patient.id %}" class="btn btn-primary">Start Checkup</a>
+        <a href="{% url 'doctor_patients_list' %}" class="btn btn-secondary">Back to List</a>
+    </div>
+</div>
+
+<div class="row" style="display: grid; grid-template-columns: 1fr 2fr; gap: 30px;">
+    <!-- Left Column: Personal Info & Vitals -->
+    <div style="display: flex; flex-direction: column; gap: 20px;">
+        <div class="card">
+            <div class="card-header">
+                <h2>👤 Personal Info</h2>
+            </div>
+            <div class="card-body">
+                <ul class="list-group" style="border: none; box-shadow: none;">
+                    <li class="list-group-item"><strong>Gender:</strong> {{ patient.get_gender_display }}</li>
+                    <li class="list-group-item"><strong>Age:</strong> {{ patient.get_age }} years</li>
+                    <li class="list-group-item"><strong>Phone:</strong> {{ patient.phone }}</li>
+                    <li class="list-group-item"><strong>Location:</strong> {{ patient.city }}, {{ patient.country }}
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Medical History Summary -->
+        <div class="card">
+            <div class="card-header">
+                <h2>🏥 Medical History</h2>
+            </div>
+            <div class="card-body">
+                {% if medical_form %}
+                <div class="mb-3">
+                    <h4 style="font-size: 14px;">Chronic Diseases</h4>
+                    {% if medical_form.has_chronic_diseases %}
+                    {% for disease in medical_form.chronic_diseases %}
+                    <span class="badge badge-danger">{{ disease }}</span>
+                    {% endfor %}
+                    {% else %}
+                    <p class="text-muted">None</p>
+                    {% endif %}
+                </div>
+                <div class="mb-3">
+                    <h4 style="font-size: 14px;">Allergies</h4>
+                    {% if medical_form.has_allergies %}
+                    <p>{{ medical_form.allergies }}</p>
+                    {% else %}
+                    <p class="text-muted">None</p>
+                    {% endif %}
+                </div>
+                {% else %}
+                <p class="text-muted">No medical form completed yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column: Files & History -->
+    <div style="display: flex; flex-direction: column; gap: 20px;">
+
+        <!-- Uploaded Files -->
+        <div class="card">
+            <div class="card-header">
+                <h2>📂 Uploaded Medical Records</h2>
+            </div>
+            <div class="card-body">
+                {% if medical_records %}
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Description</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for record in medical_records %}
+                            <tr>
+                                <td>{{ record.uploaded_at|date:"M d, Y" }}</td>
+                                <td>{{ record.description }}</td>
+                                <td>
+                                    <a href="{{ record.file.url }}" target="_blank" class="btn btn-sm btn-outline">View
+                                        File</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted">No files uploaded by patient.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Previous Checkups -->
+        <div class="card">
+            <div class="card-header">
+                <h2>📋 Checkup History</h2>
+            </div>
+            <div class="card-body">
+                {% if checkups %}
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Diagnosis</th>
+                                <th>Vitals</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for checkup in checkups %}
+                            <tr>
+                                <td>{{ checkup.created_at|date:"M d, Y" }}</td>
+                                <td>{{ checkup.diagnosis|truncatechars:30 }}</td>
+                                <td>
+                                    <span class="badge badge-info">BP: {{ checkup.blood_pressure_systolic }}/{{
+                                        checkup.blood_pressure_diastolic }}</span>
+                                    <span class="badge badge-warning">HR: {{ checkup.heart_rate }}</span>
+                                </td>
+                                <td>
+                                    <a href="{% url 'checkup_detail' checkup.id %}"
+                                        class="btn btn-sm btn-secondary">Details</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted">No previous checkups with you.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

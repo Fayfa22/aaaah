@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
 from django.http import JsonResponse
@@ -8,7 +9,7 @@ from django.utils import timezone
 from datetime import datetime, timedelta, date
 from .models import (
     CustomUser, DoctorProfile, PatientProfile, MedicalForm, 
-    MedicalRecord, Appointment, Checkup, Prescription, Medication
+    MedicalRecord, Appointment, Checkup, Prescription, Medication, Message
 )
 from .forms import (
     LoginForm, DoctorSignUpForm, PatientSignUpForm, MedicalFormForm,
@@ -197,6 +198,7 @@ def patient_dashboard(request):
     
     # Get latest checkup
     latest_checkup = patient.checkups.first()
+    latest_checkup = Checkup.objects.filter(patient=patient).order_by('-created_at').first()
     
     # Get upcoming appointments (next 3)
     today = date.today()
@@ -205,14 +207,14 @@ def patient_dashboard(request):
         status__in=['scheduled', 'confirmed']
     ).order_by('date', 'time')[:3]
     
-    # Get active medications
-    active_medications = patient.medications.filter(status='active')
+    # Get active medications count
+    active_medications_count = patient.medications.filter(status='active').count()
     
     context = {
         'patient': patient,
         'latest_checkup': latest_checkup,
         'upcoming_appointments': upcoming_appointments,
-        'active_medications': active_medications,
+        'active_medications_count': active_medications_count,
     }
     
     return render(request, 'patient/dashboard.html', context)
@@ -315,6 +317,13 @@ def doctor_profile(request):
 
 
 # Appointment Views
+@login_required
+def symptom_checker(request):
+    if request.user.role != 'patient':
+        messages.error(request, "Only patients can access the Symptom Checker.")
+        return redirect('dashboard')
+    return render(request, 'patient/checkup_checker.html')
+
 @login_required
 def book_appointment(request):
     if request.user.role != 'patient':
@@ -491,11 +500,27 @@ def record_checkup(request, patient_id):
         if form.is_valid():
             checkup = form.save(commit=False)
             checkup.patient = patient
-            checkup.doctor = doctor
+            checkup.doctor = request.user.doctor_profile
             checkup.save()
+
+            # Handle Lab Tests
+            test_names = request.POST.getlist('test_name[]')
+            result_values = request.POST.getlist('result_value[]')
+            units = request.POST.getlist('unit[]')
+            reference_ranges = request.POST.getlist('reference_range[]')
             
-            # Redirect to add prescription
-            return redirect('add_prescription', checkup_id=checkup.id)
+            for i in range(len(test_names)):
+                if test_names[i] and result_values[i]:  # Only save if name and result exist
+                    LabTest.objects.create(
+                        checkup=checkup,
+                        test_name=test_names[i],
+                        result_value=result_values[i],
+                        unit=units[i] if i < len(units) else '',
+                        reference_range=reference_ranges[i] if i < len(reference_ranges) else ''
+                    )
+
+            messages.success(request, "Checkup recorded successfully.")
+            return redirect('doctor_patients_list')
     else:
         form = CheckupForm()
     
@@ -592,35 +617,24 @@ def prescriptions_list(request):
         
         return render(request, 'prescription/prescriptions_list.html', context)
     else:
-        return redirect('dashboard')
+        return redirect('dashboard') # Doctors don't have a direct 'prescriptions_list' view, they see them via patient detail
 
 
-# Medications Views
 @login_required
 def medications_list(request):
     if request.user.role != 'patient':
         return redirect('dashboard')
-    
-    patient = get_object_or_404(PatientProfile, user=request.user)
-    
-    # Filter by status
+        
+    patient = request.user.patient_profile
     status_filter = request.GET.get('status')
-    medications = patient.medications.all()
+    
+    medications = Medication.objects.filter(patient=patient).order_by('-start_date')
     
     if status_filter:
         medications = medications.filter(status=status_filter)
-    
-    # Separate active and inactive
-    active_medications = medications.filter(status='active').order_by('-start_date')
-    completed_medications = medications.filter(status='completed').order_by('-end_date')
-    discontinued_medications = medications.filter(status='discontinued').order_by('-updated_at')
-    
+        
     context = {
         'medications': medications,
-        'active_medications': active_medications,
-        'completed_medications': completed_medications,
-        'discontinued_medications': discontinued_medications,
-        'status_choices': ['active', 'completed', 'discontinued'],
         'selected_status': status_filter,
     }
     
@@ -653,63 +667,209 @@ def edit_medication(request, medication_id):
     return render(request, 'patient/edit_medication.html', context)
 
 
+@login_required
+def doctor_patient_detail(request, patient_id):
+    if request.user.role != 'doctor':
+        return redirect('dashboard')
+    
+    doctor = get_object_or_404(DoctorProfile, user=request.user)
+    patient = get_object_or_404(PatientProfile, id=patient_id)
+    
+    # Check if doctor has ever had an appointment with this patient
+    has_access = Appointment.objects.filter(doctor=doctor, patient=patient).exists()
+    
+    if not has_access:
+        # Redirect if no access
+        return redirect('doctor_patients_list')
+        
+    # Gather all data
+    medical_form = getattr(patient, 'medical_form', None)
+    medical_records = patient.medical_records.all()
+    checkups = patient.checkups.filter(doctor=doctor).order_by('-created_at')
+    prescriptions = patient.prescriptions.filter(doctor=doctor).order_by('-created_at')
+    
+    # Process medical form data for template
+    medical_data = None
+    if medical_form:
+        medical_data = {
+            'has_chronic_diseases': medical_form.has_chronic_diseases,
+            'chronic_diseases': [d.strip() for d in medical_form.chronic_diseases.split(',') if d.strip()] if medical_form.chronic_diseases else [],
+            'has_allergies': medical_form.has_allergies,
+            'allergies': medical_form.allergies,
+            'vaccines': [v.strip() for v in medical_form.vaccines.split(',') if v.strip()] if medical_form.vaccines else [],
+            'has_family_history': medical_form.has_family_history,
+            'family_history': [f.strip() for f in medical_form.family_history.split(',') if f.strip()] if medical_form.family_history else [],
+        }
+
+    context = {
+        'patient': patient,
+        'medical_form': medical_data,
+        'medical_records': medical_records,
+        'checkups': checkups,
+        'prescriptions': prescriptions,
+    }
+    
+    return render(request, 'doctor/patient_detail.html', context)
+
+
 # Chatbot View
 @login_required
 def chatbot(request):
-    messages = []
+    chat_history = []
     response = None
     
     if request.method == 'POST':
         user_message = request.POST.get('message', '').strip().lower()
         
         if user_message:
-            messages.append({'role': 'user', 'text': user_message})
+            chat_history.append({'role': 'user', 'text': user_message})
             response = handle_chatbot_query(user_message, request.user)
-            messages.append({'role': 'bot', 'text': response})
+            chat_history.append({'role': 'bot', 'text': response})
     
     context = {
-        'messages': messages,
+        'messages': chat_history,
         'response': response,
     }
     
     return render(request, 'chatbot.html', context)
 
 
+from .utils import predict_disease
+
 def handle_chatbot_query(message, user):
-    """Simple chatbot query handler"""
+    """Advanced chatbot query handler"""
     
     # Greeting responses
     if any(word in message for word in ['hello', 'hi', 'hey', 'greetings']):
-        return f"Hello! 👋 I'm MediConnect Assistant. How can I help you today?"
+        return f"Hello {user.first_name}! 👋 I'm MediConnect Assistant. How can I help you today?"
     
+    # Symptom Analysis (Keyword detection for prediction)
+    # Check if message contains multiple symptoms
+    detected_symptoms = []
+    # This matches symptoms from our list (simple contains check)
+    from .utils import DISEASE_PATTERNS
+    all_symptoms = set()
+    for pattern in DISEASE_PATTERNS.values():
+        all_symptoms.update(pattern)
+        
+    for s in all_symptoms:
+        if s.replace('_', ' ') in message or s in message:
+            detected_symptoms.append(s)
+            
+    if len(detected_symptoms) >= 2:
+        predictions = predict_disease(detected_symptoms)
+        if predictions:
+            top = predictions[0]
+            response = f"Based on symptoms ({', '.join(detected_symptoms)}), it might be **{top['disease']}** ({top['probability']}% confidence). "
+            response += "Please consult a doctor for accuracy."
+            return response
+
+    # Symptom Analysis (Simple keyword matching for advice)
+    symptoms_advice = {
+        'headache': 'Headaches can be caused by stress, dehydration, or eye strain. If it persists, please book an appointment.',
+        'fever': 'A fever usually indicates your body is fighting an infection. Drink plenty of fluids and rest. If it exceeds 39°C (102°F), see a doctor immediately.',
+        'cold': 'Common cold symptoms include runny nose and sore throat. Rest and hydration are key.',
+        'pain': 'Where is the pain located? If it is severe or sudden chest pain, please seek emergency help immediately.',
+        'tired': 'Fatigue can be due to lack of sleep, stress, or nutritional deficiency. Ensure you are getting 7-8 hours of sleep.',
+    }
+    
+    for symptom, advice in symptoms_advice.items():
+        if symptom in message:
+            return f"I noticed you mentioned '{symptom}'. {advice}"
+
     # Appointment queries
     if 'appointment' in message:
         if user.role == 'patient':
-            return "You can book appointments by going to 'Book Appointment' from the menu. Would you like help with anything specific?"
+            count = Appointment.objects.filter(patient__user=user, status='scheduled').count()
+            return f"You have {count} scheduled appointment(s). You can book more by going to 'Book Appointment' from the menu."
         else:
-            return "You can view all appointments in your doctor dashboard. Your schedule is updated in real-time."
+            count = Appointment.objects.filter(doctor__user=user, status='scheduled').count()
+            return f"You have {count} upcoming appointments scheduled."
     
-    # Doctor queries
-    if 'doctor' in message:
-        return "You can find doctors in the appointment booking section. Each doctor has their specialization and experience listed."
-    
-    # Prescription queries
-    if 'prescription' in message:
-        if user.role == 'patient':
-            return "Your prescriptions are in the 'Prescriptions' section. You can track your medications from there."
-        else:
-            return "You can create prescriptions after recording a checkup for your patients."
-    
-    # Medical records
-    if 'medical' in message or 'records' in message:
-        if user.role == 'patient':
-            return "You can upload and view your medical records in the 'Medical Records' section of your profile."
-        else:
-            return "You can access your patients' medical records when viewing their profiles."
-    
-    # Default response
-    return "I'm here to help! I can assist with questions about appointments, doctors, prescriptions, medical records, and medications. What would you like to know?"
+        return "You can manage your appointments in the 'Appointments' section. Do you want to book a new one?"
+        
+    if 'record' in message or 'history' in message:
+        return "Your medical records are available in the 'Records' tab."
+        
+    if 'medication' in message or 'drug' in message:
+        return "You can view your active medications in the 'Medications' section."
 
+    return "I'm here to help! I can assist with appointments, symptom advice, medications, and navigating the portal. How can I facilitate your healthcare journey today?"
+
+
+@login_required
+def update_appointment_status(request, appointment_id, new_status):
+    if request.user.role != 'doctor':
+        return redirect('dashboard')
+        
+    appointment = get_object_or_404(Appointment, id=appointment_id)
+    if appointment.doctor.user != request.user:
+        return redirect('dashboard')
+        
+    if new_status in dict(Appointment.STATUS_CHOICES):
+        appointment.status = new_status
+        appointment.save()
+        messages.success(request, f"Appointment updated to {appointment.get_status_display()}")
+        
+    return redirect('doctor_appointments_list')
+
+# Edit Profile Views
+@login_required
+def edit_patient_profile(request):
+    if request.user.role != 'patient':
+        return redirect('dashboard')
+    
+    patient = get_object_or_404(PatientProfile, user=request.user)
+    
+    if request.method == 'POST':
+        # Handles User model fields (first_name, last_name, email)
+        user_form = PatientSignUpForm(request.POST, instance=request.user)
+        # We need a separate form for profile fields if we want to edit them, 
+        # but for now we'll reuse the signup form structure or just update manually
+        # ideally we should have a PatientUpdateForm.
+        # Let's assume we update basic info via the User model form part
+        
+        # Simplified update logic for this task to ensure functionality
+        user = request.user
+        user.first_name = request.POST.get('first_name')
+        user.last_name = request.POST.get('last_name')
+        user.email = request.POST.get('email')
+        user.save()
+        
+        patient.phone = request.POST.get('phone')
+        patient.city = request.POST.get('city')
+        patient.country = request.POST.get('country')
+        patient.save()
+        
+        messages.success(request, "Profile updated successfully.")
+        return redirect('patient_profile')
+
+    return render(request, 'patient/edit_profile.html', {'patient': patient, 'user': request.user})
+
+@login_required
+def edit_doctor_profile(request):
+    if request.user.role != 'doctor':
+        return redirect('dashboard')
+    
+    doctor = get_object_or_404(DoctorProfile, user=request.user)
+    
+    if request.method == 'POST':
+        user = request.user
+        user.first_name = request.POST.get('first_name')
+        user.last_name = request.POST.get('last_name')
+        user.email = request.POST.get('email')
+        user.save()
+        
+        doctor.phone = request.POST.get('phone')
+        doctor.specialization = request.POST.get('specialization')
+        doctor.clinic_name = request.POST.get('clinic_name')
+        doctor.clinic_address = request.POST.get('clinic_address')
+        doctor.save()
+        
+        messages.success(request, "Profile updated successfully.")
+        return redirect('doctor_profile')
+
+    return render(request, 'doctor/edit_profile.html', {'doctor': doctor, 'user': request.user})
 
 # AJAX API endpoints
 @login_required
@@ -735,8 +895,58 @@ def get_doctor_availability(request, doctor_id):
     
     while current_time <= end_time:
         time_str = current_time.strftime('%H:%M')
-        if time_str not in existing_appointments:
+        # Check if slot is already taken
+        is_taken = False
+        for taken_time in existing_appointments:
+            # Simple string comparison might fail if formats differ, ensuring consistent comparison
+            if str(taken_time)[:5] == time_str:
+                is_taken = True
+                break
+        
+        if not is_taken:
             time_slots.append(time_str)
+            
         current_time += timedelta(minutes=30)
     
     return JsonResponse({'time_slots': time_slots})
+
+
+# Messaging Views
+@login_required
+def inbox(request):
+    received_messages = Message.objects.filter(recipient=request.user).order_by('-created_at')
+    sent_messages = Message.objects.filter(sender=request.user).order_by('-created_at')
+    return render(request, 'messaging/inbox.html', {
+        'received_messages': received_messages,
+        'sent_messages': sent_messages
+    })
+
+@login_required
+def send_message(request):
+    if request.method == 'POST':
+        recipient_id = request.POST.get('recipient')
+        subject = request.POST.get('subject')
+        body = request.POST.get('body')
+        
+        recipient = get_object_or_404(CustomUser, id=recipient_id)
+        
+        Message.objects.create(
+            sender=request.user,
+            recipient=recipient,
+            subject=subject,
+            body=body
+        )
+        messages.success(request, "Message sent successfully.")
+        return redirect('inbox')
+    
+    # Get potential recipients
+    if request.user.role == 'patient':
+        # Patients can message their doctors (from appointments)
+        doctor_ids = Appointment.objects.filter(patient__user=request.user).values_list('doctor__user__id', flat=True).distinct()
+        recipients = CustomUser.objects.filter(id__in=doctor_ids)
+    else:
+        # Doctors can message their patients
+        patient_ids = Appointment.objects.filter(doctor__user=request.user).values_list('patient__user__id', flat=True).distinct()
+        recipients = CustomUser.objects.filter(id__in=patient_ids)
+        
+    return render(request, 'messaging/send_message.html', {'recipients': recipients})

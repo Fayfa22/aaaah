@@ -125,6 +125,7 @@ class Appointment(models.Model):
     STATUS_CHOICES = (
         ('scheduled', 'Scheduled'),
         ('confirmed', 'Confirmed'),
+        ('in_progress', 'In Progress'),
         ('completed', 'Completed'),
         ('cancelled', 'Cancelled'),
     )
@@ -199,14 +200,24 @@ class Prescription(models.Model):
     frequency = models.CharField(max_length=100, help_text="e.g., 3 times a day, twice daily")
     duration = models.CharField(max_length=100, help_text="e.g., 10 days, 2 weeks")
     instructions = models.TextField(blank=True)
-    
     created_at = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
-        return f"{self.medication_name} - {self.patient.user.first_name}"
+        return f"{self.medication_name} for {self.patient.user.first_name}"
+
+class Message(models.Model):
+    sender = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='sent_messages')
+    recipient = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='received_messages')
+    subject = models.CharField(max_length=255, blank=True)
+    body = models.TextField()
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
     
     class Meta:
         ordering = ['-created_at']
+        
+    def __str__(self):
+        return f"From {self.sender} to {self.recipient} - {self.created_at}"
 
 
 class Medication(models.Model):
@@ -234,5 +245,15 @@ class Medication(models.Model):
     def __str__(self):
         return f"{self.medication_name} - {self.patient.user.first_name}"
     
-    class Meta:
-        ordering = ['-start_date']
+class LabTest(models.Model):
+    checkup = models.ForeignKey(Checkup, on_delete=models.CASCADE, related_name='lab_tests')
+    test_name = models.CharField(max_length=100)
+    result_value = models.CharField(max_length=100)
+    unit = models.CharField(max_length=50, blank=True)
+    reference_range = models.CharField(max_length=100, blank=True)
+    observation = models.TextField(blank=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"{self.test_name} - {self.checkup}"

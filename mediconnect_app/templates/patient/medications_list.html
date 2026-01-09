@@ -7,17 +7,21 @@
 <p style="color: #999; margin-bottom: 30px;">Track your current and past medications</p>
 
 <!-- Filter Tabs -->
+<!-- Filter Tabs -->
 <div style="display: flex; gap: 10px; margin-bottom: 25px; border-bottom: 2px solid #eee;">
-    <a href="?status=" class="btn btn-outline btn-sm" style="border: none; border-bottom: 3px solid {% if not selected_status %}#0066cc{% else %}transparent{% endif %}; padding-bottom: 10px; border-radius: 0; background: none; color: inherit;">
+    <a href="?status=" class="btn btn-outline btn-sm tab-link {% if not selected_status %}active-all{% endif %}">
         All ({{ medications.count }})
     </a>
-    <a href="?status=active" class="btn btn-outline btn-sm" style="border: none; border-bottom: 3px solid {% if selected_status == 'active' %}#00b366{% else %}transparent{% endif %}; padding-bottom: 10px; border-radius: 0; background: none; color: inherit;">
+    <a href="?status=active"
+        class="btn btn-outline btn-sm tab-link {% if selected_status == 'active' %}active-active{% endif %}">
         Active ({{ active_medications.count }})
     </a>
-    <a href="?status=completed" class="btn btn-outline btn-sm" style="border: none; border-bottom: 3px solid {% if selected_status == 'completed' %}#0066cc{% else %}transparent{% endif %}; padding-bottom: 10px; border-radius: 0; background: none; color: inherit;">
+    <a href="?status=completed"
+        class="btn btn-outline btn-sm tab-link {% if selected_status == 'completed' %}active-completed{% endif %}">
         Completed ({{ completed_medications.count }})
     </a>
-    <a href="?status=discontinued" class="btn btn-outline btn-sm" style="border: none; border-bottom: 3px solid {% if selected_status == 'discontinued' %}#ff4444{% else %}transparent{% endif %}; padding-bottom: 10px; border-radius: 0; background: none; color: inherit;">
+    <a href="?status=discontinued"
+        class="btn btn-outline btn-sm tab-link {% if selected_status == 'discontinued' %}active-discontinued{% endif %}">
         Discontinued ({{ discontinued_medications.count }})
     </a>
 </div>
@@ -25,47 +29,65 @@
 <!-- Medications Table -->
 <div class="card">
     {% if medications %}
-        <div class="table-responsive">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Medication</th>
-                        <th>Dosage</th>
-                        <th>Frequency</th>
-                        <th>Period</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for medication in medications %}
-                        <tr>
-                            <td><strong>{{ medication.medication_name }}</strong></td>
-                            <td>{{ medication.dosage }}</td>
-                            <td>{{ medication.frequency }}</td>
-                            <td>
-                                {{ medication.start_date|date:"M d" }}
-                                {% if medication.end_date %}
-                                    - {{ medication.end_date|date:"M d, Y" }}
-                                {% else %}
-                                    - Ongoing
-                                {% endif %}
-                            </td>
-                            <td>
-                                <span class="badge status-{{ medication.status }}">{{ medication.get_status_display }}</span>
-                            </td>
-                            <td>
-                                <a href="{% url 'edit_medication' medication.id %}" class="btn btn-sm btn-primary">Edit</a>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+    <div class="medication-grid"
+        style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
+        {% for medication in medications %}
+        <div class="card" style="margin-bottom: 0; display: flex; flex-direction: column;">
+            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px;">
+                <div>
+                    <h3 style="margin: 0 0 5px 0; font-size: 1.1rem; color: #333;">{{ medication.medication_name }}</h3>
+                    <span class="badge status-{{ medication.status }}">{{ medication.get_status_display }}</span>
+                </div>
+                <div
+                    style="background: #f0f7ff; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 50%; color: #0066cc;">
+                    💊
+                </div>
+            </div>
+
+            <div style="flex-grow: 1;">
+                <div
+                    style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.9rem; margin-bottom: 15px;">
+                    <div>
+                        <span style="display: block; color: #888; font-size: 0.8rem;">Dosage</span>
+                        {{ medication.dosage }}
+                    </div>
+                    <div>
+                        <span style="display: block; color: #888; font-size: 0.8rem;">Frequency</span>
+                        {{ medication.frequency }}
+                    </div>
+                    <div>
+                        <span style="display: block; color: #888; font-size: 0.8rem;">Start Date</span>
+                        {{ medication.start_date|date:"M d, Y" }}
+                    </div>
+                    <div>
+                        <span style="display: block; color: #888; font-size: 0.8rem;">End Date</span>
+                        {% if medication.end_date %}
+                        {{ medication.end_date|date:"M d, Y" }}
+                        {% else %}
+                        Ongoing
+                        {% endif %}
+                    </div>
+                </div>
+
+                {% if medication.notes %}
+                <div
+                    style="background: #f9fafb; padding: 10px; border-radius: 6px; font-size: 0.85rem; color: #555; margin-bottom: 15px;">
+                    📝 {{ medication.notes }}
+                </div>
+                {% endif %}
+            </div>
+
+            <div style="border-top: 1px solid #eee; padding-top: 15px; margin-top: auto; text-align: right;">
+                <a href="{% url 'edit_medication' medication.id %}" class="btn btn-sm btn-outline-primary"
+                    style="width: 100%;">Edit Details</a>
+            </div>
         </div>
+        {% endfor %}
+    </div>
     {% else %}
-        <div style="padding: 40px; text-align: center;">
-            <p style="color: #999;">No medications found in this category.</p>
-        </div>
+    <div style="padding: 40px; text-align: center;">
+        <p style="color: #999;">No medications found in this category.</p>
+    </div>
     {% endif %}
 </div>
 {% endblock %}

@@ -3,7 +3,10 @@
 {% block title %}Patient Profile - MediConnect{% endblock %}
 
 {% block content %}
-<h1>👤 Your Profile</h1>
+<div style="display: flex; justify-content: space-between; align-items: center;">
+    <h1>👤 Your Profile</h1>
+    <a href="{% url 'edit_patient_profile' %}" class="btn btn-outline-primary">Edit Profile</a>
+</div>
 
 <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 30px; margin-top: 30px;">
     <!-- Profile Card -->
@@ -14,7 +17,8 @@
         <div class="card-body">
             <div style="margin-bottom: 20px;">
                 <label style="color: #999; font-size: 12px; text-transform: uppercase;">Full Name</label>
-                <div style="font-size: 18px; font-weight: 600;">{{ patient.user.first_name }} {{ patient.user.last_name }}</div>
+                <div style="font-size: 18px; font-weight: 600;">{{ patient.user.first_name }} {{ patient.user.last_name
+                    }}</div>
             </div>
 
             <div style="margin-bottom: 20px;">
@@ -51,58 +55,58 @@
     <!-- Medical Information -->
     <div>
         {% if medical_form %}
-            <div class="card">
-                <div class="card-header">
-                    <h3 style="margin: 0;">Medical History</h3>
-                </div>
-                <div class="card-body">
-                    {% if medical_form.has_chronic_diseases and medical_form.chronic_diseases %}
-                        <div style="margin-bottom: 25px;">
-                            <h4 style="color: #0066cc;">Chronic Diseases</h4>
-                            <div style="display: flex; flex-wrap: wrap; gap: 10px;">
-                                {% for disease in medical_form.chronic_diseases %}
-                                    <span class="badge badge-danger">{{ disease }}</span>
-                                {% endfor %}
-                            </div>
-                        </div>
-                    {% endif %}
-
-                    {% if medical_form.has_allergies and medical_form.allergies %}
-                        <div style="margin-bottom: 25px;">
-                            <h4 style="color: #0066cc;">Allergies</h4>
-                            <p>{{ medical_form.allergies }}</p>
-                        </div>
-                    {% endif %}
-
-                    {% if medical_form.vaccines %}
-                        <div style="margin-bottom: 25px;">
-                            <h4 style="color: #0066cc;">Vaccines</h4>
-                            <div style="display: flex; flex-wrap: wrap; gap: 10px;">
-                                {% for vaccine in medical_form.vaccines %}
-                                    <span class="badge badge-primary">{{ vaccine }}</span>
-                                {% endfor %}
-                            </div>
-                        </div>
-                    {% endif %}
-
-                    {% if medical_form.has_family_history and medical_form.family_history %}
-                        <div>
-                            <h4 style="color: #0066cc;">Family History</h4>
-                            <div style="display: flex; flex-wrap: wrap; gap: 10px;">
-                                {% for condition in medical_form.family_history %}
-                                    <span class="badge badge-warning">{{ condition }}</span>
-                                {% endfor %}
-                            </div>
-                        </div>
-                    {% endif %}
-                </div>
+        <div class="card">
+            <div class="card-header">
+                <h3 style="margin: 0;">Medical History</h3>
             </div>
+            <div class="card-body">
+                {% if medical_form.has_chronic_diseases and medical_form.chronic_diseases %}
+                <div style="margin-bottom: 25px;">
+                    <h4 style="color: #0066cc;">Chronic Diseases</h4>
+                    <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                        {% for disease in medical_form.chronic_diseases %}
+                        <span class="badge badge-danger">{{ disease }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if medical_form.has_allergies and medical_form.allergies %}
+                <div style="margin-bottom: 25px;">
+                    <h4 style="color: #0066cc;">Allergies</h4>
+                    <p>{{ medical_form.allergies }}</p>
+                </div>
+                {% endif %}
+
+                {% if medical_form.vaccines %}
+                <div style="margin-bottom: 25px;">
+                    <h4 style="color: #0066cc;">Vaccines</h4>
+                    <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                        {% for vaccine in medical_form.vaccines %}
+                        <span class="badge badge-primary">{{ vaccine }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if medical_form.has_family_history and medical_form.family_history %}
+                <div>
+                    <h4 style="color: #0066cc;">Family History</h4>
+                    <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                        {% for condition in medical_form.family_history %}
+                        <span class="badge badge-warning">{{ condition }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
         {% else %}
-            <div class="alert alert-info">
-                <p><strong>📋 Medical History Not Completed</strong></p>
-                <p>Complete your medical history to help doctors provide better care.</p>
-                <a href="{% url 'complete_medical_form' user.id %}" class="btn btn-primary btn-sm mt-1">Complete Now</a>
-            </div>
+        <div class="alert alert-info">
+            <p><strong>📋 Medical History Not Completed</strong></p>
+            <p>Complete your medical history to help doctors provide better care.</p>
+            <a href="{% url 'complete_medical_form' user.id %}" class="btn btn-primary btn-sm mt-1">Complete Now</a>
+        </div>
         {% endif %}
 
         <!-- Quick Stats -->

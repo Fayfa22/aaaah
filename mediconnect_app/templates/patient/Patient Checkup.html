@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>MediConnect — Medical Intake Form with Disease Prediction</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-gray-50 font-sans min-h-screen">
+  
+  <!-- Navbar -->
+  <nav class="w-[95%] mx-auto mt-6 px-10 py-4 bg-[#7bc1b7] backdrop-blur-md rounded-3xl shadow-md flex items-center justify-between">
+    <div class="text-white font-bold tracking-wide" style="font-family: 'Montserrat', sans-serif;">
+      MediConnect
+    </div>
+    <div class="flex items-center gap-8 text-white font-medium">
+      <a href="Patient Dashboard.html" class="hover:text-gray-100 transition">Dashboard</a>
+      <a href="Patient Profile.html" class="hover:text-gray-100 transition">Profile</a>
+      <a href="Appointments List.html" class="hover:text-gray-100 transition">Appointments</a>
+      <a href="LogIn.html" class="hover:text-gray-100 transition">Logout</a>
+    </div>
+  </nav>
+
+  <div class="w-[95%] mx-auto mt-8 px-6 pb-12">
+    <div class="bg-white rounded-2xl shadow-lg p-8 mb-6">
+      <h1 class="text-2xl font-semibold text-[#0b8fac] mb-2">Medical Intake Form with Disease Prediction</h1>
+      <p class="text-sm text-gray-500 mb-6">Please complete this form. The system will analyze your symptoms and provide disease probability predictions.</p>
+
+      <form id="intakeForm" action="#" method="POST" enctype="multipart/form-data" novalidate>
+        
+        <!-- Presenting Complaint -->
+        <section class="mb-6">
+          <h2 class="text-lg font-medium mb-3">Presenting Complaint</h2>
+          <label class="block text-sm font-medium text-gray-700">What brings you in today? <span class="text-red-500">*</span></label>
+          <textarea name="presenting_complaint" required rows="3" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-[#0b8fac]" placeholder="Describe main symptoms, onset, progression..."></textarea>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Onset</label>
+              <input name="onset" type="text" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-[#0b8fac]" placeholder="e.g. 3 days ago">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Duration</label>
+              <input name="duration" type="text" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-[#0b8fac]" placeholder="Intermittent / Continuous">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Severity (1–10)</label>
+              <input name="severity" type="number" min="0" max="10" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-[#0b8fac]" placeholder="6">
+            </div>
+          </div>
+        </section>
+
+        <!-- Comprehensive Symptoms Section -->
+        <section class="mb-6">
+          <h2 class="text-lg font-medium mb-3">Symptoms Checklist</h2>
+          <p class="text-sm text-gray-600 mb-4">Select all symptoms you are experiencing. The system will analyze these for disease prediction.</p>
+          
+          <div id="symptomsContainer" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 max-h-96 overflow-y-auto p-4 bg-gray-50 rounded-lg border">
+            <!-- Symptoms will be populated by JavaScript -->
+          </div>
+        </section>
+
+        <!-- Past Medical History -->
+        <section class="mb-6">
+          <h2 class="text-lg font-medium mb-3">Past Medical & Surgical History</h2>
+          <textarea name="past_history" rows="3" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-[#0b8fac]" placeholder="List chronic conditions, prior surgeries, hospitalizations..."></textarea>
+        </section>
+
+        <!-- Medications & Allergies -->
+        <section class="mb-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <h2 class="text-lg font-medium mb-2">Current Medications</h2>
+              <textarea name="medications" rows="3" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-[#0b8fac]" placeholder="Name, dose, frequency"></textarea>
+            </div>
+            <div>
+              <h2 class="text-lg font-medium mb-2">Allergies</h2>
+              <textarea name="allergies" rows="3" class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-[#0b8fac]" placeholder="Allergies, reaction type"></textarea>
+            </div>
+          </div>
+        </section>
+
+        <!-- Social & Family History -->
+        <section class="mb-6">
+          <h2 class="text-lg font-medium mb-3">Social & Family History</h2>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Smoking</label>
+              <select name="smoking" class="mt-1 block w-full rounded-lg border-gray-300 focus:ring-2 focus:ring-[#0b8fac]">
+                <option value="">Never</option>
+                <option>Current smoker</option>
+                <option>Former smoker</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Alcohol</label>
+              <select name="alcohol" class="mt-1 block w-full rounded-lg border-gray-300 focus:ring-2 focus:ring-[#0b8fac]">
+                <option value="">None</option>
+                <option>Occasional</option>
+                <option>Weekly</option>
+                <option>Daily</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Family History</label>
+              <input name="family_history" type="text" class="mt-1 block w-full rounded-lg border-gray-300 focus:ring-2 focus:ring-[#0b8fac]" placeholder="e.g. Diabetes, Heart disease">
+            </div>
+          </div>
+        </section>
+
+        <!-- Vitals -->
+        <section class="mb-6">
+          <h2 class="text-lg font-medium mb-3">Vitals</h2>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Blood Pressure</label>
+              <input name="blood_pressure" type="text" class="mt-1 block w-full rounded-lg border-gray-300 focus:ring-2 focus:ring-[#0b8fac]" placeholder="120/80 mmHg">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Heart Rate (bpm)</label>
+              <input name="hr" type="number" min="30" max="220" class="mt-1 block w-full rounded-lg border-gray-300 focus:ring-2 focus:ring-[#0b8fac]">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Temperature (°C)</label>
+              <input name="temp" type="number" step="0.1" class="mt-1 block w-full rounded-lg border-gray-300 focus:ring-2 focus:ring-[#0b8fac]" placeholder="36.6">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Oxygen Sat (%)</label>
+              <input name="spo2" type="number" min="50" max="100" class="mt-1 block w-full rounded-lg border-gray-300 focus:ring-2 focus:ring-[#0b8fac]" placeholder="98">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Weight (kg)</label>
+              <input id="weight" name="weight" type="number" step="0.1" min="0" class="mt-1 block w-full rounded-lg border-gray-300 focus:ring-2 focus:ring-[#0b8fac]">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Height (cm)</label>
+              <input id="height" name="height" type="number" step="0.1" min="0" class="mt-1 block w-full rounded-lg border-gray-300 focus:ring-2 focus:ring-[#0b8fac]">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">BMI</label>
+              <input id="bmi" name="bmi" readonly type="text" class="mt-1 block w-full rounded-lg border-gray-200 bg-gray-100" placeholder="Auto">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Waist (cm)</label>
+              <input name="waist" type="number" step="0.1" min="0" class="mt-1 block w-full rounded-lg border-gray-300 focus:ring-2 focus:ring-[#0b8fac]">
+            </div>
+          </div>
+        </section>
+
+        <!-- Disease Prediction Results (Hidden Initially) -->
+        <section id="predictionResults" class="mb-6 hidden">
+          <div class="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-2xl p-6 border-l-4 border-[#0b8fac]">
+            <h2 class="text-xl font-semibold text-[#0b8fac] mb-4 flex items-center">
+              <span class="mr-2">🔬</span>
+              Disease Prediction Analysis
+            </h2>
+            <div id="predictionContent" class="space-y-3">
+              <!-- Prediction results will be displayed here -->
+            </div>
+          </div>
+        </section>
+
+        <!-- Consents -->
+        <section class="mb-6">
+          <h2 class="text-lg font-medium mb-3">Legal & Privacy</h2>
+          <div class="space-y-3">
+            <label class="inline-flex items-start">
+              <input id="consent_terms" name="consent_terms" type="checkbox" required class="mt-1 mr-3">
+              <div>
+                <div class="font-medium">I agree to the Terms & Conditions</div>
+                <div class="text-sm text-gray-600">(required)</div>
+              </div>
+            </label>
+            <label class="inline-flex items-start">
+              <input id="consent_privacy" name="consent_privacy" type="checkbox" required class="mt-1 mr-3">
+              <div>
+                <div class="font-medium">I consent to the Privacy Policy (HIPAA/GDPR)</div>
+                <div class="text-sm text-gray-600">We will process your health data securely.</div>
+              </div>
+            </label>
+          </div>
+        </section>
+
+        <!-- Submit -->
+        <div class="flex items-center justify-between mt-6">
+          <div class="text-sm text-gray-500">All fields are secure and confidential.</div>
+          <div class="flex items-center gap-4">
+            <button type="button" id="analyzeBtn" class="px-6 py-2 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition">
+              🔍 Analyze Symptoms
+            </button>
+            <button type="reset" class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100">Reset</button>
+            <button type="submit" class="px-6 py-2 bg-[#0b8fac] text-white rounded-lg font-semibold hover:bg-[#097e98]">Submit</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Symptom list from the dataset (132 symptoms)
+    const symptoms = [
+      'itching', 'skin_rash', 'nodal_skin_eruptions', 'continuous_sneezing', 'shivering', 'chills',
+      'joint_pain', 'stomach_pain', 'acidity', 'ulcers_on_tongue', 'muscle_wasting', 'vomiting',
+      'burning_micturition', 'spotting_ urination', 'fatigue', 'weight_gain', 'anxiety', 'cold_hands_and_feets',
+      'mood_swings', 'weight_loss', 'restlessness', 'lethargy', 'patches_in_throat', 'irregular_sugar_level',
+      'cough', 'high_fever', 'sunken_eyes', 'breathlessness', 'sweating', 'dehydration', 'indigestion', 'headache',
+      'yellowish_skin', 'dark_urine', 'nausea', 'loss_of_appetite', 'pain_behind_the_eyes', 'back_pain',
+      'constipation', 'abdominal_pain', 'diarrhoea', 'mild_fever', 'yellow_urine', 'yellowing_of_eyes',
+      'acute_liver_failure', 'fluid_overload', 'swelling_of_stomach', 'swelled_lymph_nodes', 'malaise',
+      'blurred_and_distorted_vision', 'phlegm', 'throat_irritation', 'redness_of_eyes', 'sinus_pressure',
+      'runny_nose', 'congestion', 'chest_pain', 'weakness_in_limbs', 'fast_heart_rate', 'pain_during_bowel_movements',
+      'pain_in_anal_region', 'bloody_stool', 'irritation_in_anus', 'neck_pain', 'dizziness', 'cramps',
+      'bruising', 'obesity', 'swollen_legs', 'swollen_blood_vessels', 'puffy_face_and_eyes', 'enlarged_thyroid',
+      'brittle_nails', 'swollen_extremeties', 'excessive_hunger', 'extra_marital_contacts', 'drying_and_tingling_lips',
+      'slurred_speech', 'knee_pain', 'hip_joint_pain', 'muscle_weakness', 'stiff_neck', 'swelling_joints',
+      'movement_stiffness', 'spinning_movements', 'loss_of_balance', 'unsteadiness', 'weakness_of_one_body_side',
+      'loss_of_smell', 'bladder_discomfort', 'foul_smell_of urine', 'continuous_feel_of_urine', 'passage_of_gases',
+      'internal_itching', 'toxic_look_(typhos)', 'depression', 'irritability', 'muscle_pain', 'altered_sensorium',
+      'red_spots_over_body', 'belly_pain', 'abnormal_menstruation', 'dischromic _patches', 'watering_from_eyes',
+      'increased_appetite', 'polyuria', 'family_history', 'mucoid_sputum', 'rusty_sputum', 'lack_of_concentration',
+      'visual_disturbances', 'receiving_blood_transfusion', 'receiving_unsterile_injections', 'coma',
+      'stomach_bleeding', 'distention_of_abdomen', 'history_of_alcohol_consumption', 'fluid_overload',
+      'blood_in_sputum', 'prominent_veins_on_calf', 'palpitations', 'painful_walking', 'pus_filled_pimples',
+      'blackheads', 'scurring', 'skin_peeling', 'silver_like_dusting', 'small_dents_in_nails', 'inflammatory_nails',
+      'blister', 'red_sore_around_nose', 'yellow_crust_ooze'
+    ];
+
+    // Disease patterns from test data (simplified pattern matching)
+    const diseasePatterns = {
+      'Fungal infection': ['itching', 'skin_rash', 'nodal_skin_eruptions'],
+      'Allergy': ['continuous_sneezing', 'shivering', 'chills'],
+      'GERD': ['stomach_pain', 'acidity', 'ulcers_on_tongue', 'vomiting', 'cough'],
+      'Chronic cholestasis': ['itching', 'vomiting', 'yellowish_skin', 'nausea', 'loss_of_appetite', 'abdominal_pain'],
+      'Drug Reaction': ['skin_rash', 'stomach_pain', 'burning_micturition', 'spotting_ urination'],
+      'Peptic ulcer diseae': ['vomiting', 'dehydration', 'indigestion', 'abdominal_pain', 'passage_of_gases'],
+      'AIDS': ['ulcers_on_tongue', 'patches_in_throat', 'high_fever', 'extra_marital_contacts'],
+      'Diabetes ': ['fatigue', 'weight_loss', 'restlessness', 'lethargy', 'irregular_sugar_level', 'polyuria', 'family_history'],
+      'Gastroenteritis': ['vomiting', 'sunken_eyes', 'dehydration', 'diarrhoea'],
+      'Bronchial Asthma': ['fatigue', 'cough', 'high_fever', 'breathlessness', 'mucoid_sputum', 'rusty_sputum'],
+      'Hypertension ': ['indigestion', 'chest_pain', 'fast_heart_rate', 'palpitations'],
+      'Migraine': ['acidity', 'indigestion', 'headache', 'blurred_and_distorted_vision', 'depression', 'irritability'],
+      'Cervical spondylosis': ['back_pain', 'neck_pain', 'dizziness', 'loss_of_balance'],
+      'Paralysis (brain hemorrhage)': ['vomiting', 'headache', 'weakness_of_one_body_side'],
+      'Jaundice': ['itching', 'vomiting', 'fatigue', 'high_fever', 'yellowish_skin', 'dark_urine', 'weight_loss', 'abdominal_pain'],
+      'Malaria': ['chills', 'vomiting', 'high_fever', 'headache', 'nausea', 'sweating'],
+      'Chicken pox': ['skin_rash', 'fatigue', 'lethargy', 'high_fever', 'headache', 'mild_fever', 'swelled_lymph_nodes', 'malaise', 'redness_of_eyes'],
+      'Dengue': ['skin_rash', 'chills', 'fatigue', 'high_fever', 'headache', 'nausea', 'loss_of_appetite', 'pain_behind_the_eyes', 'malaise', 'redness_of_eyes'],
+      'Typhoid': ['chills', 'vomiting', 'fatigue', 'high_fever', 'headache', 'nausea', 'abdominal_pain', 'diarrhoea'],
+      'hepatitis A': ['chills', 'vomiting', 'yellowish_skin', 'dark_urine', 'nausea', 'loss_of_appetite', 'abdominal_pain', 'diarrhoea', 'mild_fever', 'yellowing_of_eyes'],
+      'Hepatitis B': ['itching', 'fatigue', 'lethargy', 'yellowish_skin', 'dark_urine', 'loss_of_appetite', 'abdominal_pain', 'yellow_urine', 'yellowing_of_eyes', 'receiving_blood_transfusion', 'receiving_unsterile_injections'],
+      'Hepatitis C': ['fatigue', 'yellowish_skin', 'nausea', 'loss_of_appetite', 'yellowing_of_eyes', 'receiving_unsterile_injections'],
+      'Hepatitis D': ['chills', 'vomiting', 'fatigue', 'yellowish_skin', 'dark_urine', 'nausea', 'loss_of_appetite', 'abdominal_pain', 'yellowing_of_eyes'],
+      'Hepatitis E': ['chills', 'vomiting', 'fatigue', 'high_fever', 'yellowish_skin', 'dark_urine', 'nausea', 'loss_of_appetite', 'abdominal_pain', 'yellowing_of_eyes', 'receiving_blood_transfusion'],
+      'Alcoholic hepatitis': ['vomiting', 'yellowish_skin', 'swelling_of_stomach', 'history_of_alcohol_consumption', 'fluid_overload'],
+      'Tuberculosis': ['chills', 'vomiting', 'fatigue', 'weight_loss', 'cough', 'high_fever', 'breathlessness', 'sweating', 'mucoid_sputum', 'rusty_sputum', 'blood_in_sputum'],
+      'Common Cold': ['continuous_sneezing', 'chills', 'fatigue', 'cough', 'high_fever', 'headache', 'runny_nose', 'congestion', 'sinus_pressure', 'throat_irritation', 'mucoid_sputum'],
+      'Pneumonia': ['chills', 'fatigue', 'cough', 'high_fever', 'breathlessness', 'sweating', 'mucoid_sputum', 'rusty_sputum', 'blood_in_sputum'],
+      'Dimorphic hemmorhoids(piles)': ['constipation', 'pain_during_bowel_movements', 'pain_in_anal_region', 'bloody_stool', 'irritation_in_anus'],
+      'Heart attack': ['vomiting', 'chest_pain', 'sweating'],
+      'Varicose veins': ['fatigue', 'swollen_legs', 'swollen_blood_vessels', 'painful_walking'],
+      'Hypothyroidism': ['fatigue', 'weight_gain', 'cold_hands_and_feets', 'mood_swings', 'lethargy', 'dizziness', 'obesity', 'puffy_face_and_eyes', 'enlarged_thyroid', 'brittle_nails', 'swollen_extremeties', 'depression', 'irritability'],
+      'Hyperthyroidism': ['fatigue', 'mood_swings', 'sweating', 'dizziness', 'excessive_hunger', 'increased_appetite', 'irritability'],
+      'Hypoglycemia': ['vomiting', 'fatigue', 'sweating', 'headache', 'dizziness', 'excessive_hunger', 'increased_appetite', 'irregular_sugar_level'],
+      'Osteoarthristis': ['chills', 'joint_pain', 'knee_pain', 'hip_joint_pain'],
+      'Arthritis': ['swelling_joints', 'movement_stiffness', 'painful_walking'],
+      '(vertigo) Paroymsal  Positional Vertigo': ['vomiting', 'headache', 'dizziness', 'spinning_movements', 'loss_of_balance', 'unsteadiness'],
+      'Acne': ['skin_rash', 'pus_filled_pimples', 'blackheads'],
+      'Urinary tract infection': ['burning_micturition', 'bladder_discomfort', 'foul_smell_of urine'],
+      'Psoriasis': ['skin_rash', 'joint_pain', 'skin_peeling'],
+      'Impetigo': ['skin_rash', 'high_fever', 'blister', 'red_sore_around_nose', 'yellow_crust_ooze']
+    };
+
+    // Format symptom name for display
+    function formatSymptomName(symptom) {
+      return symptom.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    }
+
+    // Populate symptoms checkboxes
+    function populateSymptoms() {
+      const container = document.getElementById('symptomsContainer');
+      symptoms.forEach(symptom => {
+        const label = document.createElement('label');
+        label.className = 'inline-flex items-center text-sm';
+        label.innerHTML = `
+          <input type="checkbox" name="symptom[]" value="${symptom}" class="mr-2 symptom-checkbox">
+          <span>${formatSymptomName(symptom)}</span>
+        `;
+        container.appendChild(label);
+      });
+    }
+
+    // Calculate disease probabilities based on selected symptoms
+    function calculateDiseaseProbabilities(selectedSymptoms) {
+      const predictions = {};
+      
+      Object.keys(diseasePatterns).forEach(disease => {
+        const pattern = diseasePatterns[disease];
+        const matchedSymptoms = pattern.filter(symptom => selectedSymptoms.includes(symptom));
+        const matchCount = matchedSymptoms.length;
+        const patternLength = pattern.length;
+        
+        if (matchCount > 0) {
+          // Calculate probability based on symptom overlap
+          const baseProbability = (matchCount / patternLength) * 100;
+          // Adjust based on total selected symptoms (penalize too many symptoms)
+          const adjustmentFactor = Math.min(1, patternLength / (selectedSymptoms.length + 1));
+          const finalProbability = Math.min(95, baseProbability * (1 + adjustmentFactor * 0.2));
+          
+          predictions[disease] = {
+            probability: finalProbability,
+            matchedSymptoms: matchedSymptoms,
+            totalSymptoms: patternLength
+          };
+        }
+      });
+
+      // Sort by probability
+      return Object.entries(predictions)
+        .sort((a, b) => b[1].probability - a[1].probability)
+        .slice(0, 5); // Top 5 predictions
+    }
+
+    // Display prediction results
+    function displayPredictions(predictions) {
+      const resultsSection = document.getElementById('predictionResults');
+      const contentDiv = document.getElementById('predictionContent');
+      
+      if (predictions.length === 0) {
+        contentDiv.innerHTML = `
+          <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
+            <p class="text-yellow-800">No significant disease matches found. Please consult with a healthcare professional.</p>
+          </div>
+        `;
+        resultsSection.classList.remove('hidden');
+        return;
+      }
+
+      let html = '<div class="space-y-4">';
+      
+      predictions.forEach(([disease, data], index) => {
+        const probability = Math.round(data.probability);
+        const colorClass = probability >= 70 ? 'bg-red-100 border-red-500 text-red-800' :
+                          probability >= 50 ? 'bg-orange-100 border-orange-500 text-orange-800' :
+                          'bg-yellow-100 border-yellow-500 text-yellow-800';
+        
+        html += `
+          <div class="border-l-4 ${colorClass} p-4 rounded-lg">
+            <div class="flex justify-between items-start mb-2">
+              <h3 class="font-semibold text-lg">${index + 1}. ${disease}</h3>
+              <span class="text-2xl font-bold">${probability}%</span>
+            </div>
+            <div class="mt-2">
+              <div class="w-full bg-gray-200 rounded-full h-2.5 mb-2">
+                <div class="h-2.5 rounded-full ${probability >= 70 ? 'bg-red-600' : probability >= 50 ? 'bg-orange-500' : 'bg-yellow-500'}" 
+                     style="width: ${probability}%"></div>
+              </div>
+              <p class="text-sm text-gray-700">
+                <strong>Matched Symptoms:</strong> ${data.matchedSymptoms.map(s => formatSymptomName(s)).join(', ')}
+              </p>
+              <p class="text-xs text-gray-600 mt-1">
+                ${data.matchedSymptoms.length} out of ${data.totalSymptoms} typical symptoms present
+              </p>
+            </div>
+          </div>
+        `;
+      });
+      
+      html += `
+        <div class="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+          <p class="text-sm text-blue-800">
+            <strong>⚠️ Important:</strong> This is an AI-based prediction tool and should not replace professional medical diagnosis. 
+            Please consult with a qualified healthcare provider for accurate diagnosis and treatment.
+          </p>
+        </div>
+      `;
+      
+      html += '</div>';
+      contentDiv.innerHTML = html;
+      resultsSection.classList.remove('hidden');
+      
+      // Smooth scroll to results
+      resultsSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    // Analyze symptoms button handler
+    document.getElementById('analyzeBtn').addEventListener('click', function() {
+      const selectedSymptoms = Array.from(document.querySelectorAll('.symptom-checkbox:checked'))
+        .map(cb => cb.value);
+      
+      if (selectedSymptoms.length === 0) {
+        alert('Please select at least one symptom to analyze.');
+        return;
+      }
+      
+      // Show loading state
+      const btn = this;
+      const originalText = btn.innerHTML;
+      btn.innerHTML = '🔄 Analyzing...';
+      btn.disabled = true;
+      
+      // Simulate analysis delay
+      setTimeout(() => {
+        const predictions = calculateDiseaseProbabilities(selectedSymptoms);
+        displayPredictions(predictions);
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+      }, 800);
+    });
+
+    // BMI calculation
+    const weightInput = document.getElementById('weight');
+    const heightInput = document.getElementById('height');
+    const bmiInput = document.getElementById('bmi');
+
+    function calculateBMI() {
+      const weight = parseFloat(weightInput.value);
+      const height = parseFloat(heightInput.value) / 100;
+      
+      if (weight && height && height > 0) {
+        const bmi = (weight / (height * height)).toFixed(1);
+        bmiInput.value = bmi;
+        
+        bmiInput.classList.remove('bg-red-100', 'bg-yellow-100', 'bg-green-100');
+        if (bmi < 18.5) {
+          bmiInput.classList.add('bg-yellow-100');
+        } else if (bmi >= 18.5 && bmi < 25) {
+          bmiInput.classList.add('bg-green-100');
+        } else if (bmi >= 25 && bmi < 30) {
+          bmiInput.classList.add('bg-yellow-100');
+        } else {
+          bmiInput.classList.add('bg-red-100');
+        }
+      } else {
+        bmiInput.value = '';
+        bmiInput.classList.remove('bg-red-100', 'bg-yellow-100', 'bg-green-100');
+      }
+    }
+
+    weightInput.addEventListener('input', calculateBMI);
+    heightInput.addEventListener('input', calculateBMI);
+
+    // Initialize
+    populateSymptoms();
+  </script>
+
+</body>
+</html>

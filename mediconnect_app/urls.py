@@ -19,12 +19,19 @@ urlpatterns = [
     
     # Profiles
     path('patient/profile/', views.patient_profile, name='patient_profile'),
+    path('patient/profile/edit/', views.edit_patient_profile, name='edit_patient_profile'),
     path('doctor/profile/', views.doctor_profile, name='doctor_profile'),
+    path('doctor/profile/edit/', views.edit_doctor_profile, name='edit_doctor_profile'),
     
+    # Messaging
+    path('inbox/', views.inbox, name='inbox'),
+    path('message/new/', views.send_message, name='send_message'),
+
     # Appointments
     path('appointments/book/', views.book_appointment, name='book_appointment'),
     path('appointments/', views.appointments_list, name='appointments_list'),
     path('doctor/appointments/', views.doctor_appointments_list, name='doctor_appointments_list'),
+    path('doctor/appointments/status/<int:appointment_id>/<str:new_status>/', views.update_appointment_status, name='update_appointment_status'),
     path('appointment/<int:appointment_id>/', views.appointment_detail, name='appointment_detail'),
     
     # Medical Records
@@ -33,6 +40,8 @@ urlpatterns = [
     
     # Checkups
     path('doctor/patients/', views.doctor_patient_list, name='doctor_patients_list'),
+    path('doctor/patient/<int:patient_id>/', views.doctor_patient_detail, name='doctor_patient_detail'),
+    path('patient/symptom-checker/', views.symptom_checker, name='symptom_checker'),
     path('doctor/checkup/<int:patient_id>/', views.record_checkup, name='record_checkup'),
     path('checkup/<int:checkup_id>/', views.checkup_detail, name='checkup_detail'),
     

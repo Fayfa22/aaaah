@@ -5,23 +5,24 @@
 {% block content %}
 <div style="max-width: 900px; margin: 0 auto;">
     <h1>💓 Record Checkup</h1>
-    <p style="color: #999; margin-bottom: 30px;">Patient: <strong>{{ patient.user.first_name }} {{ patient.user.last_name }}</strong></p>
+    <p style="color: #999; margin-bottom: 30px;">Patient: <strong>{{ patient.user.first_name }} {{
+            patient.user.last_name }}</strong></p>
 
     <div class="card">
         <form method="POST">
             {% csrf_token %}
 
             {% if form.non_field_errors %}
-                <div class="alert alert-danger">
-                    {% for error in form.non_field_errors %}
-                        <p>{{ error }}</p>
-                    {% endfor %}
-                </div>
+            <div class="alert alert-danger">
+                {% for error in form.non_field_errors %}
+                <p>{{ error }}</p>
+                {% endfor %}
+            </div>
             {% endif %}
 
             <!-- Vital Signs Section -->
             <h3 style="color: #0066cc; margin-bottom: 20px;">📊 Vital Signs</h3>
-            
+
             <div class="form-row">
                 <div class="form-group">
                     <label>Heart Rate (bpm)</label>
@@ -83,6 +84,48 @@
                 <label>Notes (optional)</label>
                 {{ form.notes }}
             </div>
+
+            <!-- Lab Tests Section -->
+            <h3 style="color: #0066cc; margin-bottom: 20px; margin-top: 30px;">🧪 Lab Tests</h3>
+            <div id="lab-tests-container">
+                <!-- Dynamic rows -->
+            </div>
+            <button type="button" class="btn btn-sm btn-outline-primary" id="add-test-btn" style="margin-top: 10px;">+
+                Add Lab Test</button>
+
+            <script>
+                document.getElementById('add-test-btn').addEventListener('click', function () {
+                    const container = document.getElementById('lab-tests-container');
+                    const row = document.createElement('div');
+                    row.className = 'lab-test-row';
+                    row.style.cssText = 'display: grid; grid-template-columns: 2fr 1fr 1fr 1fr auto; gap: 10px; margin-bottom: 10px; align-items: end;';
+
+                    row.innerHTML = `
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label style="font-size: 0.8rem;">Test Name</label>
+                            <input type="text" name="test_name[]" class="form-control" placeholder="e.g. Hemoglobin" required>
+                        </div>
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label style="font-size: 0.8rem;">Result</label>
+                            <input type="text" name="result_value[]" class="form-control" placeholder="Value" required>
+                        </div>
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label style="font-size: 0.8rem;">Unit</label>
+                            <input type="text" name="unit[]" class="form-control" placeholder="e.g. g/dL">
+                        </div>
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label style="font-size: 0.8rem;">Ref Range</label>
+                            <input type="text" name="reference_range[]" class="form-control" placeholder="e.g. 12-16">
+                        </div>
+                        <button type="button" class="btn btn-sm btn-danger remove-row" style="height: 38px;">×</button>
+                    `;
+                    container.appendChild(row);
+
+                    row.querySelector('.remove-row').addEventListener('click', function () {
+                        row.remove();
+                    });
+                });
+            </script>
 
             <!-- Submit -->
             <div style="margin-top: 30px; display: flex; gap: 10px;">
